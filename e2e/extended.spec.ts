@@ -256,6 +256,7 @@ test("invoice draft with logo persists only on explicit save and can be deleted"
       localStorage.getItem("nexus-tools-invoice-draft"),
     ),
   ).toBeNull();
+  await page.getByLabel("Invoice watermark (optional)").fill("CONFIDENTIAL");
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
   await page.reload();
   await open(page, "Invoice Generator");
@@ -263,6 +264,7 @@ test("invoice draft with logo persists only on explicit save and can be deleted"
   await expect(page.getByLabel("Seller / business")).toHaveValue(
     "Draft business",
   );
+  await expect(page.getByLabel("Invoice watermark (optional)")).toHaveValue("CONFIDENTIAL");
   await page
     .getByRole("button", { name: "Create invoice", exact: true })
     .click();

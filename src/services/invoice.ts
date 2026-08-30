@@ -3,6 +3,7 @@ import { ToolError } from "./errors";
 import type { ToolResult } from "./files";
 export interface Invoice {
   logo?: string;
+  watermark?: string;
   seller: string;
   customer: string;
   number: string;
@@ -29,6 +30,7 @@ export function validateInvoice(invoice: Invoice) {
     !["THB", "USD", "EUR"].includes(invoice.currency)
   )
     throw new ToolError("invoice");
+  if (invoice.watermark !== undefined && (typeof invoice.watermark !== "string" || invoice.watermark.length > 100)) throw new ToolError("invoice");
   const parsed = new Date(`${invoice.date}T12:00:00Z`);
   if (
     !Number.isFinite(parsed.getTime()) ||

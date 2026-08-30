@@ -14,6 +14,7 @@ export default function InvoiceTool() {
   const runner = useToolRunner();
   const logoController = useRef<AbortController | null>(null);
   useEffect(() => () => logoController.current?.abort(), []);
+  const [watermark, setWatermark] = useState("");
   const [logoBusy, setLogoBusy] = useState(false);
   const [logo, setLogo] = useState(""),
     [draftMessage, setDraftMessage] = useState("");
@@ -49,6 +50,7 @@ export default function InvoiceTool() {
           void runner.run(async (signal) => {
             const result = await createInvoicePdf({
               logo,
+              watermark,
               seller,
               customer,
               number,
@@ -79,6 +81,7 @@ export default function InvoiceTool() {
                   items,
                   language,
                   logo,
+              watermark,
                 });
                 setDraftMessage(
                   ok
@@ -111,6 +114,7 @@ export default function InvoiceTool() {
                 setTax(v.tax);
                 setItems(v.items);
                 setLogo(v.logo ?? "");
+                setWatermark(v.watermark ?? "");
                 runner.reset();
                 setDraftMessage(t("Draft restored.", "เรียกคืนแบบร่างแล้ว"));
               }}
@@ -322,6 +326,11 @@ export default function InvoiceTool() {
               />
             </label>
           </div>
+          <label className="field">
+            {t("Invoice watermark (optional)", "ลายน้ำใบแจ้งหนี้ (ไม่บังคับ)")}
+            <input maxLength={100} value={watermark} placeholder={t("COPY / For this customer only", "สำเนา / ใช้สำหรับลูกค้ารายนี้เท่านั้น")} onChange={(event) => setWatermark(event.target.value)} />
+          </label>
+          <p className="field-hint">{t("A faint diagonal watermark appears on every PDF page. Leave empty to omit. It identifies the document but does not encrypt it or prevent editing.", "ลายน้ำพาดเฉียงจาง 18% ทุกหน้า PDF เว้นว่างเพื่อไม่ใส่ลายน้ำ ช่วยระบุการใช้งานเอกสาร แต่ไม่ใช่การเข้ารหัสหรือป้องกันการแก้ไข")}</p>
           <div className="invoice-total" aria-live="polite">
             <span>{t("Total including tax", "รวมสุทธิหลังภาษี")}</span>
             <strong>

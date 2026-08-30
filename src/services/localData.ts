@@ -46,6 +46,7 @@ export function readDraft(): Invoice | null {
     return null;
   return {
     ...v,
+    watermark: typeof v.watermark === "string" && v.watermark.length <= 100 ? v.watermark : "",
     logo:
       typeof v.logo === "string" &&
       /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(v.logo) &&

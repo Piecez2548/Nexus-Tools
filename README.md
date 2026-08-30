@@ -99,3 +99,5 @@ Invoice creation automatically downloads a PDF (no print dialog); the result lin
 Media QR modes encode HTTPS sharing links, not uploaded files. Host the media separately and grant intended viewers access. Scanning requires internet and may require opening the link or pressing play. Links may expire or stop working after file/access changes. Nexus Tools does not fetch, validate availability of, or store the media.
 
 OCR now prepares images/PDF pages with bounded upscaling, grayscale and automatic dark-background inversion. Users may override the background or crop a percentage region (applied to every PDF page). Optional Thai spacing cleanup preserves raw OCR and offers a separate download; it can remove intentional spaces and does not fix recognition errors. Small Thai text, names, digits, watermarks and clipped screenshots still require proofreading.
+
+Invoices support an optional 100-character diagonal watermark at 18% opacity on every PDF page. It is saved with explicit local drafts; older drafts default to no watermark. This is a visual identifier, not encryption or tamper protection.

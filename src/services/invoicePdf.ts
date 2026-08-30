@@ -1,3 +1,4 @@
+import { drawWatermark } from "./watermark";
 import { PDFDocument } from "pdf-lib";
 import { validateInvoice, type Invoice } from "./invoice";
 import { abortCheck, canvasBlob } from "./imageTools";
@@ -46,6 +47,7 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
     abortCheck(signal);
     text(t("Prepared with Nexus Tools - not a certified tax invoice.", "จัดทำด้วย Nexus Tools เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง"), left, 1650, false, 18);
     text(String(pageNumber), right, 1650, false, 18, "right");
+    drawWatermark(ctx, canvas.width, canvas.height, invoice.watermark ?? "");
     const image = await pdf.embedPng(await (await canvasBlob(canvas)).arrayBuffer());
     pdf.addPage([595.28, 841.89]).drawImage(image, { x: 0, y: 0, width: 595.28, height: 841.89 });
     await new Promise((resolve) => setTimeout(resolve, 0));

@@ -210,6 +210,7 @@ test("invoice downloads a real PDF directly and calculates tax", async ({
     await page.getByRole("button", { name: "Add item", exact: true }).click();
     await page.getByLabel(`Description ${i}`, { exact: true }).fill("บริการออกแบบและพัฒนาเว็บไซต์พร้อมดูแลระบบ ".repeat(10));
   }
+  await page.getByLabel("Invoice watermark (optional)").fill("สำเนา - สำหรับลูกค้าเท่านั้น");
   const longDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "Create invoice", exact: true }).click();
   const longFile = await longDownload;
