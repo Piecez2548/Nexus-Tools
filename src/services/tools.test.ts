@@ -69,10 +69,14 @@ describe("deterministic calculations", () => {
       paragraphs: 2,
     });
     expect(countText("ภาษาไทย", "th").words).toBeGreaterThan(0);
-    expect(countText("👨‍👩‍👧‍👦", "en").characters).toBe(1);
+    expect(countText("👨‍👩‍👧‍👦", "en")).toMatchObject({ characters: 11, graphemes: 1 });
+    expect(countText("กิ้", "th")).toMatchObject({ characters: 3, graphemes: 1 });
+    expect(countText("A \nB", "en")).toMatchObject({ characters: 4, graphemes: 4 });
+    expect(countText("A\r\nB", "en")).toMatchObject({ characters: 4, graphemes: 3 });
     expect(countText("", "th")).toEqual({
       words: 0,
       characters: 0,
+      graphemes: 0,
       paragraphs: 0,
       bytes: 0,
     });

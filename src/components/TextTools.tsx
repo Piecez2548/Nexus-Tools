@@ -46,15 +46,16 @@ export default function TextTools({
           />
           <small>
             {t(
-              "Up to 100,000 characters. Word boundaries use your browser’s language-aware segmentation.",
-              "สูงสุด 100,000 ตัวอักษร แบ่งคำตามภาษาด้วยระบบของเบราว์เซอร์",
+              "Up to 100,000 UTF-16 units. Counts include spaces and line breaks; the browser normalizes line endings to LF.",
+              "สูงสุด 100,000 หน่วย UTF-16 รวมช่องว่างและขึ้นบรรทัดใหม่ โดยเบราว์เซอร์แปลงการขึ้นบรรทัดเป็น LF",
             )}
           </small>
         </label>
         <div className="text-stats" aria-live="polite">
           {[
             [t("Words", "คำ"), counts.words],
-            [t("Characters", "ตัวอักษร"), counts.characters],
+            [t("Characters (UTF-16)", "ตัวอักษร (UTF-16)"), counts.characters],
+            [t("Visible characters", "ตัวอักษรที่มองเห็น"), counts.graphemes],
             [t("Paragraphs", "ย่อหน้า"), counts.paragraphs],
             ["UTF-8 bytes", counts.bytes],
           ].map(([label, number]) => (
@@ -64,6 +65,12 @@ export default function TextTools({
             </div>
           ))}
         </div>
+        <p className="field-hint">
+          {t(
+            "UTF-16 counts combining marks separately; emoji can use multiple units. Visible characters combine marks and joined emoji into grapheme clusters. For example, กิ้ = 3 UTF-16 units but 1 visible character. Word segmentation depends on the browser. Compare identical text, including whitespace and line breaks.",
+            "UTF-16 นับสระและวรรณยุกต์แยกกัน ส่วนอีโมจิอาจใช้หลายหน่วย ตัวอักษรที่มองเห็นจะรวมเครื่องหมายและอีโมจิที่เชื่อมกัน เช่น กิ้ = 3 หน่วย UTF-16 แต่ 1 ตัวที่มองเห็น การแบ่งคำขึ้นกับเบราว์เซอร์ หากเทียบกับโปรแกรมอื่น ต้องใช้ข้อความ ช่องว่าง และขึ้นบรรทัดที่ตรงกัน",
+          )}
+        </p>
         <button
           className="button secondary"
           disabled={!text}

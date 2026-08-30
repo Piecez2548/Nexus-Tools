@@ -166,6 +166,9 @@ test("unit conversion and text counting work with actual user input", async ({
   await page
     .getByRole("button", { name: "Open Word Counter", exact: true })
     .click();
+  await page.getByLabel("Your text").fill("กิ้ 👨‍👩‍👧‍👦");
+  await expect(page.locator(".text-stats > div").filter({ hasText: "Characters (UTF-16)" }).locator("strong")).toHaveText("15");
+  await expect(page.locator(".text-stats > div").filter({ hasText: "Visible characters" }).locator("strong")).toHaveText("3");
   await page.getByLabel("Your text").fill("Hello world");
   await expect(page.locator(".text-stats > div").first()).toContainText("2");
   const pending = page.waitForEvent("download");

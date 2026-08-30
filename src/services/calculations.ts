@@ -54,7 +54,8 @@ export function countText(text: string, locale: string) {
   return {
     words: [...segmenter.segment(text)].filter((item) => item.isWordLike)
       .length,
-    characters: [...graphemes.segment(text)].length,
+    characters: text.length,
+    graphemes: [...graphemes.segment(text)].length,
     paragraphs: text.trim() ? text.trim().split(/\n\s*\n/).length : 0,
     bytes: new TextEncoder().encode(text).length,
   };
