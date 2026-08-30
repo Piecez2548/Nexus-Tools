@@ -22,7 +22,7 @@ Nexus Tools is a standalone, client-only website with 17 tool entries. Its desig
 | Split PDF | Export selected pages into one new PDF, preserving input order and removing duplicate selections | One PDF; ranges such as `3, 1-2`; same size/page limits |
 | Image Compressor | Set JPEG/WebP quality and maximum width; PNG also supported | JPEG/PNG/WebP input, 20 MB, 24 megapixels; PNG ignores quality |
 | Image Converter | Export JPEG, PNG or WebP with proportional resizing | No upscaling; JPEG flattens transparency to white; animation/metadata discarded |
-| QR Code | Text/URL, Wi-Fi, email, phone and vCard; SVG or PNG | Up to 1,000 UTF-8 payload bytes; Wi-Fi passwords are readable by anyone scanning the code and are not persisted |
+| QR Code | Text/URL, image/video HTTPS sharing links, Wi-Fi, email, phone and vCard; SVG or PNG | Up to 1,000 UTF-8 payload bytes; Wi-Fi passwords are readable by anyone scanning the code and are not persisted |
 | Unit Converter | Length, weight and temperature | Finite values, absolute-zero validation; 12 significant digits |
 | Invoice Generator | Direct A4 PDF download, normalized PNG logo, explicit local draft save/load/delete and reuse of saved items | Thai supported; THB/USD/EUR; 30 lines; integer quantities; two-decimal prices; configurable tax |
 | Word Counter | Count words, UTF-16 units, visible grapheme characters, paragraphs and UTF-8 bytes; download text | 100,000 input code units; browser Intl.Segmenter defines language-aware word boundaries |
@@ -52,7 +52,7 @@ npm run lint
 
 The development URL is `http://127.0.0.1:5174/`. E2E tests use the compiled site on port 4174; rebuild before running them.
 
-Validation includes 25 unit/hook checks and 15 Chromium E2E workflows: PDF/image/ZIP/QR/text/invoice exports, draft persistence, input recovery, OCR cancellation, same-origin OCR assets, favorites/recent tools, keyboard focus and mobile file drops. Run `npm audit` to check current dependency advisories.
+Validation includes 26 unit/hook checks and 15 Chromium E2E workflows: PDF/image/ZIP/QR/text/invoice exports, draft persistence, input recovery, OCR cancellation, same-origin OCR assets, favorites/recent tools, keyboard focus and mobile file drops. Run `npm audit` to check current dependency advisories.
 
 ## Vercel deployment
 
@@ -95,3 +95,5 @@ Watermarks in image processing (including batches) and PDF Page Manager use a sh
 Text counts include whitespace. UTF-16 counts combining marks separately and may count emoji as multiple units; visible-character counts use grapheme clusters. Browser textareas normalize line endings to LF, so compare identical text and line endings when checking another editor.
 
 Invoice creation automatically downloads a PDF (no print dialog); the result link remains available for another download. Thai text is shaped by the browser and embedded as high-resolution page images, so PDF text is not selectable/searchable. Long content flows across numbered A4 pages.
+
+Media QR modes encode HTTPS sharing links, not uploaded files. Host the media separately and grant intended viewers access. Scanning requires internet and may require opening the link or pressing play. Links may expire or stop working after file/access changes. Nexus Tools does not fetch, validate availability of, or store the media.

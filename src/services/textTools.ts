@@ -64,7 +64,7 @@ export function transformText(
     throw new ToolError("text");
   }
 }
-export type QrKind = "text" | "wifi" | "email" | "phone" | "contact";
+export type QrKind = "text" | "wifi" | "email" | "phone" | "contact" | "image" | "video";
 const qrEscape = (value: string) =>
   value.replace(/[\\;,:"]/g, "\\$&").replace(/[\r\n]/g, " ");
 const vcardEscape = (value: string) =>
@@ -87,6 +87,17 @@ export function qrPayload(kind: QrKind, fields: Record<string, string>) {
   switch (kind) {
     case "text":
       return text;
+    case "image":
+    case "video": {
+      const value = (fields.url ?? "").trim();
+      try {
+        const url = new URL(value);
+        if (url.protocol !== "https:" || url.username || url.password || (/\s/u.test(value) || [...value].some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127))) throw new Error();
+        return url.href;
+      } catch {
+        throw new ToolError("qr");
+      }
+    }
     case "wifi":
       if (!name.trim() || !["WPA", "WEP", "nopass"].includes(security))
         throw new ToolError("qr");

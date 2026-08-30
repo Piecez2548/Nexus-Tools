@@ -197,6 +197,21 @@ test("new QR formats and UTF-8 developer utilities", async ({ page }) => {
     .getByRole("button", { name: "Generate file", exact: true })
     .click();
   expect((await download(page)).readUInt32BE(16)).toBe(512);
+  for (const kind of ["image", "video"]) {
+    await page.getByLabel("QR type").selectOption(kind);
+    const input = page.getByLabel(kind === "image" ? "Image sharing link (HTTPS)" : "Video sharing link (HTTPS)");
+    await input.fill("file:///C:/private.png");
+    await page.getByRole("button", { name: "Generate file", exact: true }).click();
+    await expect(page.getByRole("alert")).toBeVisible();
+    const url = kind === "image" ? "https://example.com/photo.png?key=demo" : "https://example.com/watch?v=demo";
+    await input.fill(url);
+    await page.getByRole("button", { name: "Generate file", exact: true }).click();
+    expect((await download(page)).readUInt32BE(16)).toBe(512);
+    await expect(page.getByRole("link", { name: "Open media link to check" })).toHaveAttribute("href", url);
+    await input.fill("https://example.com/changed");
+    await expect(page.getByRole("link", { name: "Open media link to check" })).toHaveCount(0);
+  }
+
   await page.getByRole("button", { name: "Close tool" }).click();
   await open(page, "Developer Utilities");
   await page

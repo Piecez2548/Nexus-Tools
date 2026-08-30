@@ -12,6 +12,7 @@ export default function QrTool() {
   const runner = useToolRunner();
   const labels: Record<string, [string, string]> = {
     text: ["Text or link", "ข้อความหรือลิงก์"],
+    url: kind === "image" ? ["Image sharing link (HTTPS)", "ลิงก์แชร์รูปภาพ (HTTPS)"] : ["Video sharing link (HTTPS)", "ลิงก์แชร์วิดีโอ (HTTPS)"],
     name:
       kind === "wifi"
         ? ["Network name (SSID)", "ชื่อเครือข่าย (SSID)"]
@@ -24,7 +25,9 @@ export default function QrTool() {
     organization: ["Organization", "องค์กร"],
   };
   const keys =
-    kind === "text"
+    kind === "image" || kind === "video"
+      ? ["url"]
+      : kind === "text"
       ? ["text"]
       : kind === "wifi"
         ? ["name", ...(fields.security === "nopass" ? [] : ["password"])]
@@ -54,6 +57,8 @@ export default function QrTool() {
             >
               {[
                 ["text", "Text / URL"],
+                ["image", th ? "รูปภาพ" : "Image"],
+                ["video", th ? "วิดีโอ" : "Video"],
                 ["wifi", "Wi-Fi"],
                 ["email", "Email"],
                 ["phone", "Phone"],
@@ -94,8 +99,10 @@ export default function QrTool() {
                 />
               ) : (
                 <input
-                  type={key === "password" ? "password" : "text"}
-                  maxLength={300}
+                  type={key === "password" ? "password" : key === "url" ? "url" : "text"}
+                  required={key === "url"}
+                  placeholder={key === "url" ? "https://…" : undefined}
+                  maxLength={key === "url" ? 1000 : 300}
                   value={fields[key] ?? ""}
                   onChange={(e) =>
                     setFields({ ...fields, [key]: e.target.value })
@@ -104,6 +111,19 @@ export default function QrTool() {
               )}
             </label>
           ))}
+          {(kind === "image" || kind === "video") && (
+            <div className="field-hint">
+              <p>{th
+                ? "สแกน QR แล้วเปิดลิงก์รูปภาพหรือวิดีโอ ต้องเชื่อมต่ออินเทอร์เน็ต และอาจต้องแตะเปิดลิงก์หรือกดเล่นตามแอปที่สแกน"
+                : "Scanning opens your image or video link. Internet is required; the scanner may ask you to open the link or press play."}</p>
+              <p>{th
+                ? "อัปโหลดสื่อไปยังบริการที่คุณใช้อยู่ก่อน เช่น Google Drive หรือ YouTube แล้ววางลิงก์แชร์ HTTPS ตั้งสิทธิ์ให้ผู้ที่มีลิงก์ดูได้ และลองเปิดในหน้าต่างไม่ระบุตัวตนก่อนแจก QR"
+                : "Upload media to your preferred host, such as Google Drive or YouTube, then paste its HTTPS sharing link. Allow viewers with the link and test it in a private browser window before sharing the QR."}</p>
+              <p>{th
+                ? "Nexus Tools ไม่อัปโหลดหรือเก็บไฟล์สื่อ QR เก็บเฉพาะลิงก์ ผู้มี QR เข้าถึงสื่อได้ตามสิทธิ์ที่คุณตั้ง หากลบไฟล์ เปลี่ยนสิทธิ์ หรือลิงก์หมดอายุ QR จะเปิดสื่อไม่ได้"
+                : "Nexus Tools does not upload or store media. The QR contains only the link; access follows your sharing permissions. Deleting the file, changing access or an expired link can stop it working."}</p>
+            </div>
+          )}
           <label className="field">
             {th ? "รูปแบบไฟล์" : "Output format"}
             <select value={format} onChange={(e) => setFormat(e.target.value)}>
@@ -122,6 +142,11 @@ export default function QrTool() {
         </fieldset>
       </form>
       <ResultPanel runner={runner} />
+      {runner.result && (kind === "image" || kind === "video") && (
+        <a className="button secondary" href={fields.url.trim()} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">
+          {th ? "เปิดลิงก์สื่อเพื่อตรวจสอบ" : "Open media link to check"}
+        </a>
+      )}
     </>
   );
 }

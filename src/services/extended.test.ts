@@ -24,6 +24,13 @@ describe("text and QR data integrity", () => {
       "− 2: b\n+ 2: c",
     );
   });
+  it("creates media links without permitting local files or executable URLs", () => {
+    expect(qrPayload("image", { url: " https://example.com/photo.png?key=abc#view " })).toBe("https://example.com/photo.png?key=abc#view");
+    expect(qrPayload("video", { url: "https://example.com/watch?v=123" })).toBe("https://example.com/watch?v=123");
+    for (const url of ["", "file:///C:/photo.png", "blob:https://example.com/id", "data:image/png;base64,abc", "javascript:alert(1)", "http://example.com", "https://user:pass@example.com", "https://example.com/a\nb"]) {
+      expect(() => qrPayload("image", { url })).toThrow("qr");
+    }
+  });
   it("escapes QR field delimiters to prevent injected fields", () => {
     expect(
       qrPayload("wifi", {
