@@ -28,7 +28,7 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
   let paymentQr: { canvas: HTMLCanvasElement; x: number; y: number } | null = null;
   const font = (bold = false, size = 23) => { ctx.font = `${bold ? 600 : 400} ${size}px system-ui, sans-serif`; };
   const text = (value: string, x: number, at: number, bold = false, size = 23, align: CanvasTextAlign = "left") => {
-    font(bold, size); ctx.fillStyle = "#202a25"; ctx.textAlign = align; ctx.textBaseline = "top"; ctx.fillText(value, x, at);
+    font(bold, size); ctx.fillStyle = bold ? "#172b4d" : "#334155"; ctx.textAlign = align; ctx.textBaseline = "top"; ctx.fillText(value, x, at);
   };
   const wrap = (value: string, width: number, bold = false, size = 23) => {
     font(bold, size);
@@ -45,11 +45,11 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
   };
   const start = () => {
     ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffe15b"; ctx.fillRect(0, 0, canvas.width, 32); ctx.fillRect(0, canvas.height - 32, canvas.width, 32);
     y = 100; pageNumber++; paymentQr = null;
   };
   const save = async () => {
     abortCheck(signal);
+    ctx.fillStyle = "#cbd5e1"; ctx.fillRect(left, 1628, right - left, 1);
     text(t("Prepared with Nexus Tools - not a certified tax invoice.", "จัดทำด้วย Nexus Tools เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง"), left, 1650, false, 18);
     text(String(pageNumber), right, 1650, false, 18, "right");
     drawWatermark(ctx, canvas.width, canvas.height, invoice.watermark ?? "");
@@ -64,10 +64,10 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
       await ensure(size + 16); text(line, left, y, bold, size); y += size + 16;
     }
   };
-  const rule = () => { ctx.fillStyle = "#ccd5c7"; ctx.fillRect(left, y, right - left, 2); y += 22; };
+  const rule = () => { ctx.fillStyle = "#e2e8f0"; ctx.fillRect(left, y, right - left, 1); y += 22; };
   const tableHeader = async () => {
     await ensure(90);
-    ctx.fillStyle = "#efefef"; ctx.fillRect(left - 12, y - 15, right - left + 24, 65);
+    ctx.fillStyle = "#f1f5f9"; ctx.fillRect(left - 12, y - 15, right - left + 24, 65);
     text(t("Description", "รายการ"), left, y, true);
     text(t("Qty", "จำนวน"), 730, y, true, 21, "right");
     text(t("Price", "ราคา"), 930, y, true, 21, "right");
@@ -85,8 +85,9 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
     } finally { bitmap.close(); }
   }
   if (!invoice.logo) text("NEXUS", left, 110, true, 40);
-  text({quotation:"ใบเสนอราคา",invoice:"ใบแจ้งหนี้",receipt:"ใบเสร็จรับเงิน"}[kind], right, 80, true, 60, "right");
-  text({quotation:"Quotation",invoice:"Invoice",receipt:"Receipt"}[kind], right, 175, true, 46, "right");
+  text({quotation:"ใบเสนอราคา",invoice:"ใบแจ้งหนี้",receipt:"ใบเสร็จรับเงิน"}[kind], right, 90, true, 52, "right");
+  text({quotation:"Quotation",invoice:"Invoice",receipt:"Receipt"}[kind], right, 170, false, 30, "right");
+  ctx.fillStyle = "#172b4d"; ctx.fillRect(left, 244, right - left, 2);
   y = 280;
   // Wrap reference and date safely, including unusually long invoice numbers.
   await block(`${t("Document no.", "เลขที่")} ${invoice.number}   |   ${invoice.date}`, false, 20);
@@ -125,12 +126,13 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
     y += 6; rule();
   }
   await ensure(200);
-  ctx.fillStyle = "#202a25"; ctx.fillRect(left, y, right - left, 4); y += 20;
+  ctx.fillStyle = "#172b4d"; ctx.fillRect(left, y, right - left, 2); y += 20;
   for (const [label, value] of [
     [t("Subtotal", "รวมก่อนภาษี"), totals.subtotal],
     [`${t("Tax", "ภาษี")} (${Number(invoice.tax)}%)`, totals.tax],
     [t("Total", "รวมสุทธิ"), totals.total],
   ] as const) {
+    if (label === t("Total", "รวมสุทธิ")) { ctx.fillStyle = "#f1f5f9"; ctx.fillRect(left - 12, y - 10, right - left + 24, 48); }
     text(label, left, y, true); text(money(value), right, y, true, 24, "right"); y += 52;
   }
   y += 50;
@@ -155,7 +157,7 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
     const qrCanvas = document.createElement("canvas");
     await (await import("qrcode")).default.toCanvas(qrCanvas, promptPayPayload(invoice.promptPayPhone, totals.total), { width: 520, margin: 4, errorCorrectionLevel: "M" });
     paymentQr = { canvas: qrCanvas, x: qrX, y: qrY + 60 };
-    wrap(t("Verify recipient and amount in your banking app before paying.", "ตรวจชื่อผู้รับและยอดในแอปธนาคารก่อนชำระเงิน"), 480, false, 18).forEach((line,i)=>text(line,qrX,qrY+330+i*26,false,18));
+    wrap(t("Check recipient and amount in your banking app.", "ตรวจชื่อผู้รับและยอดในแอปธนาคารก่อนชำระเงิน"), 480, false, 18).forEach((line,i)=>text(line,qrX,qrY+330+i*26,false,18));
   }
   await save();
   abortCheck(signal);
