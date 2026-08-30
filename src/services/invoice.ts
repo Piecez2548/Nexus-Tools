@@ -20,7 +20,7 @@ export const escapeHtml = (value: string) =>
         char
       ]!,
   );
-export function createInvoice(invoice: Invoice): ToolResult {
+export function validateInvoice(invoice: Invoice) {
   if (
     ![invoice.seller, invoice.customer, invoice.number].every(
       (value) => value.trim() && value.length <= 2000,
@@ -36,7 +36,10 @@ export function createInvoice(invoice: Invoice): ToolResult {
   )
     throw new ToolError("invoice");
   if(invoice.logo && (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(invoice.logo) || invoice.logo.length>1000000)) throw new ToolError("invoice");
-  const totals = invoiceTotals(invoice.items, invoice.tax);
+  return invoiceTotals(invoice.items, invoice.tax);
+}
+export function createInvoice(invoice: Invoice): ToolResult {
+  const totals = validateInvoice(invoice);
   const t = (en: string, th: string) => (invoice.language === "th" ? th : en);
   const money = (value: number) =>
     new Intl.NumberFormat(invoice.language, {

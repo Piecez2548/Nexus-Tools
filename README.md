@@ -24,7 +24,7 @@ Nexus Tools is a standalone, client-only website with 17 tool entries. Its desig
 | Image Converter | Export JPEG, PNG or WebP with proportional resizing | No upscaling; JPEG flattens transparency to white; animation/metadata discarded |
 | QR Code | Text/URL, Wi-Fi, email, phone and vCard; SVG or PNG | Up to 1,000 UTF-8 payload bytes; Wi-Fi passwords are readable by anyone scanning the code and are not persisted |
 | Unit Converter | Length, weight and temperature | Finite values, absolute-zero validation; 12 significant digits |
-| Invoice Generator | Printable HTML, normalized PNG logo, explicit local draft save/load/delete and reuse of saved items | Thai supported; THB/USD/EUR; 30 lines; integer quantities; two-decimal prices; configurable tax |
+| Invoice Generator | Direct A4 PDF download, normalized PNG logo, explicit local draft save/load/delete and reuse of saved items | Thai supported; THB/USD/EUR; 30 lines; integer quantities; two-decimal prices; configurable tax |
 | Word Counter | Count words, UTF-16 units, visible grapheme characters, paragraphs and UTF-8 bytes; download text | 100,000 input code units; browser Intl.Segmenter defines language-aware word boundaries |
 | PDF Page Manager | Preview, drag or button reordering, rotation, deletion and text watermark | One PDF, 50 MB, 100 pages; retain at least one page |
 | PDF Text Replacement | Position a white region and add replacement text or erase it | Edited pages become images and lose text search/selection. Not native font editing or certified redaction. Up to 100 replacement regions |
@@ -93,3 +93,5 @@ Limitations: complex-background AI segmentation, native PDF font/content-stream 
 Watermarks in image processing (including batches) and PDF Page Manager use a shared, centered diagonal layout with 18% opacity. Text automatically fits the output dimensions; an empty label adds no watermark.
 
 Text counts include whitespace. UTF-16 counts combining marks separately and may count emoji as multiple units; visible-character counts use grapheme clusters. Browser textareas normalize line endings to LF, so compare identical text and line endings when checking another editor.
+
+Invoice creation automatically downloads a PDF (no print dialog); the result link remains available for another download. Thai text is shaped by the browser and embedded as high-resolution page images, so PDF text is not selectable/searchable. Long content flows across numbered A4 pages.

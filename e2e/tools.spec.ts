@@ -178,9 +178,9 @@ test("unit conversion and text counting work with actual user input", async ({
   );
 });
 
-test("invoice export escapes untrusted text and calculates tax", async ({
+test("invoice downloads a real PDF directly and calculates tax", async ({
   page,
-}) => {
+}, testInfo) => {
   await page
     .getByRole("button", { name: "Open Invoice Generator", exact: true })
     .click();
@@ -193,15 +193,31 @@ test("invoice export escapes untrusted text and calculates tax", async ({
   await page.getByLabel("Unit price").fill("100");
   await page.getByLabel("Tax (%)").fill("7");
   await expect(page.locator(".invoice-total strong")).toContainText("107.00");
-  await page
-    .getByRole("button", { name: "Create invoice", exact: true })
-    .click();
   const pending = page.waitForEvent("download");
-  await page.getByRole("link", { name: /Download invoice-/ }).click();
-  const html = await readFile((await (await pending).path())!, "utf8");
-  expect(html).toContain("&lt;img src=x onerror=alert(1)&gt;");
-  expect(html).not.toContain("<img src=x");
-  expect(html).toContain("107.00");
+  await page.getByRole("button", { name: "Create invoice", exact: true }).click();
+  const file = await pending;
+  expect(file.suggestedFilename()).toBe("invoice-INV-001.pdf");
+  const bytes = await readFile((await file.path())!);
+  expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
+  const pdf = await PDFDocument.load(bytes);
+  expect(pdf.getPageCount()).toBe(1);
+  expect(pdf.getPage(0).getWidth()).toBeCloseTo(595.28);
+  await file.saveAs(testInfo.outputPath("invoice.pdf"));
+  await page.getByLabel("Seller / business").fill("บริษัท เน็กซัส จำกัด\nที่อยู่ กรุงเทพมหานคร");
+  await page.getByRole("textbox", { name: "Customer", exact: true }).fill("คุณสมชาย ทดสอบ");
+  await page.getByLabel("Description 1").fill("บริการออกแบบและพัฒนาเว็บไซต์พร้อมดูแลระบบ ".repeat(10));
+  for (let i = 2; i <= 8; i++) {
+    await page.getByRole("button", { name: "Add item", exact: true }).click();
+    await page.getByLabel(`Description ${i}`, { exact: true }).fill("บริการออกแบบและพัฒนาเว็บไซต์พร้อมดูแลระบบ ".repeat(10));
+  }
+  const longDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Create invoice", exact: true }).click();
+  const longFile = await longDownload;
+  const longPdf = await PDFDocument.load(await readFile((await longFile.path())!));
+  expect(longPdf.getPageCount()).toBeGreaterThan(1);
+  await longFile.saveAs(testInfo.outputPath("invoice-thai-multipage.pdf"));
+
+
 });
 
 test("mobile menu, tool interaction and layout fit the viewport", async ({

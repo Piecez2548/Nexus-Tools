@@ -2,7 +2,8 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useLanguageStore } from "@/shared/languageStore";
 import { invoiceTotals, type InvoiceItem } from "../services/calculations";
-import { createInvoice } from "../services/invoice";
+import { createInvoicePdf } from "../services/invoicePdf";
+import { downloadFile } from "@/shared/download";
 import { useToolRunner } from "../hooks/useToolRunner";
 import ResultPanel from "./ResultPanel";
 import { readDraft, saveLocal, removeLocal } from "../services/localData";
@@ -45,8 +46,8 @@ export default function InvoiceTool() {
         onChange={runner.reset}
         onSubmit={(event) => {
           event.preventDefault();
-          void runner.run(() =>
-            createInvoice({
+          void runner.run(async (signal) => {
+            const result = await createInvoicePdf({
               logo,
               seller,
               customer,
@@ -56,8 +57,10 @@ export default function InvoiceTool() {
               tax,
               items,
               language,
-            }),
-          );
+            }, signal);
+            if (!signal.aborted) downloadFile(result.filename, result.blob, "application/pdf");
+            return result;
+          });
         }}
       >
         <fieldset disabled={runner.busy || logoBusy} className="tool-fields">
@@ -332,8 +335,8 @@ export default function InvoiceTool() {
           </div>
           <p className="field-hint">
             {t(
-              "Creates a printable HTML invoice. Open the download and print to PDF. This is not a certified tax invoice; invoice data is stored only when you choose Save draft. It remains on this device until you delete it.",
-              "สร้างใบแจ้งหนี้ HTML เปิดไฟล์ที่ดาวน์โหลดแล้วพิมพ์เป็น PDF เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง ข้อมูลจะบันทึกบนอุปกรณ์เฉพาะเมื่อกดบันทึกแบบร่าง และคงอยู่จนกว่าจะลบ",
+              "Downloads an A4 PDF directly, without a print dialog. Text is rendered as high-resolution images to preserve Thai appearance. This is not a certified tax invoice; invoice data is stored only when you choose Save draft. It remains on this device until you delete it.",
+              "ดาวน์โหลดใบแจ้งหนี้ PDF ขนาด A4 โดยตรง ไม่ต้องสั่งพิมพ์ ข้อความเป็นภาพความละเอียดสูงเพื่อรักษารูปแบบภาษาไทย เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง ข้อมูลจะบันทึกบนอุปกรณ์เฉพาะเมื่อกดบันทึกแบบร่าง และคงอยู่จนกว่าจะลบ",
             )}
           </p>
           <button className="button" type="submit">

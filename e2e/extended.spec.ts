@@ -251,9 +251,7 @@ test("invoice draft with logo persists only on explicit save and can be deleted"
   await page
     .getByRole("button", { name: "Create invoice", exact: true })
     .click();
-  expect((await download(page)).toString()).toContain(
-    'src="data:image/png;base64,',
-  );
+  expect((await PDFDocument.load(await download(page))).getPageCount()).toBe(1);
   await page.getByRole("button", { name: "Delete saved draft" }).click();
   expect(
     await page.evaluate(() =>

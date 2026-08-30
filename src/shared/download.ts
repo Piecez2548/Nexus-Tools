@@ -3,8 +3,8 @@
 // mojibake — prefixing the BOM makes it detect UTF-8 correctly.
 const UTF8_BOM = "﻿";
 
-export function downloadFile(filename: string, content: string, mimeType: string) {
-  const body = mimeType.startsWith("text/csv") ? UTF8_BOM + content : content;
+export function downloadFile(filename: string, content: string | Blob, mimeType: string) {
+  const body = typeof content === "string" && mimeType.startsWith("text/csv") ? UTF8_BOM + content : content;
   const blob = new Blob([body], { type: mimeType });
   const url = URL.createObjectURL(blob);
 
