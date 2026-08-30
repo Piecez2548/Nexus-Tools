@@ -1,3 +1,4 @@
+import { drawWatermark } from "./watermark";
 import { ToolError } from "./errors";
 import type { ToolResult } from "./files";
 export const abortCheck = (signal: AbortSignal) => {
@@ -177,27 +178,7 @@ export async function editImage(
       );
       ctx.putImageData(pixels, 0, 0);
     }
-    if (o.watermark.trim()) {
-      const size = Math.max(12, Math.round(canvas.width / 25));
-      ctx.font = `600 ${size}px system-ui`;
-      ctx.textAlign = "right";
-      ctx.textBaseline = "bottom";
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#000";
-      ctx.fillStyle = "#fff";
-      ctx.strokeText(
-        o.watermark,
-        canvas.width - 12,
-        canvas.height - 12,
-        canvas.width - 24,
-      );
-      ctx.fillText(
-        o.watermark,
-        canvas.width - 12,
-        canvas.height - 12,
-        canvas.width - 24,
-      );
-    }
+    drawWatermark(ctx, canvas.width, canvas.height, o.watermark);
     abortCheck(signal);
     const blob = await canvasBlob(
       canvas,

@@ -1,3 +1,4 @@
+import { drawWatermark } from "./watermark";
 import { PDFDocument, degrees } from "pdf-lib";
 import { ToolError } from "./errors";
 import { abortCheck, canvasBlob, readBitmap } from "./imageTools";
@@ -213,21 +214,19 @@ export async function editPdf(
       }
       if (watermark.trim()) {
         const c = document.createElement("canvas");
-        c.width = 1200;
-        c.height = 180;
+        const scale = Math.min(2, 2000 / Math.max(page.getWidth(), page.getHeight()));
+        c.width = Math.max(1, Math.round(page.getWidth() * scale));
+        c.height = Math.max(1, Math.round(page.getHeight() * scale));
         const ctx = c.getContext("2d")!;
-        ctx.font = "60px system-ui";
-        ctx.fillStyle = "rgba(70,70,70,0.45)";
-        ctx.textAlign = "center";
-        ctx.fillText(watermark, 600, 110, 1160);
+        drawWatermark(ctx, c.width, c.height, watermark);
         const img = await output.embedPng(
           await (await canvasBlob(c)).arrayBuffer(),
         );
         page.drawImage(img, {
-          x: page.getWidth() * 0.1,
-          y: page.getHeight() * 0.45,
-          width: page.getWidth() * 0.8,
-          height: page.getWidth() * 0.12,
+          x: 0,
+          y: 0,
+          width: page.getWidth(),
+          height: page.getHeight(),
         });
       }
       await new Promise((r) => setTimeout(r, 0));

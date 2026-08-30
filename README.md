@@ -89,3 +89,5 @@ Production test failure marks the workflow failed but does not automatically rol
 PDF.js and Tesseract.js use Apache-2.0 licenses; packaged language data declares MIT. Runtime licenses are copied alongside assets. Keep dependency/license notices when redistributing.
 
 Limitations: complex-background AI segmentation, native PDF font/content-stream editing, semantic text diff, multi-device draft sync and Firefox/Safari verification remain **Planned**. These are not advertised as implemented capabilities.
+
+Watermarks in image processing (including batches) and PDF Page Manager use a shared, centered diagonal layout with 18% opacity. Text automatically fits the output dimensions; an empty label adds no watermark.

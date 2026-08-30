@@ -109,6 +109,11 @@ export default function ImageStudio({
                   onChange={(e) => setO({ ...o, watermark: e.target.value })}
                 />
               </label>
+              <p className="field-hint">
+                {th
+                  ? "ลายน้ำพาดเฉียงกลางหน้า ตัวใหญ่ สีจาง 18% ไม่บังเนื้อหา"
+                  : "Large diagonal watermark across the center, at a subtle 18% opacity."}
+              </p>
               {mode === "remove-background" && (
                 <>
                   <p className="field-hint">
