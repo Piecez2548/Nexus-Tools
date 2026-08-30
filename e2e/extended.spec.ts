@@ -343,16 +343,23 @@ test("OCR can be cancelled during initialization and then restarted", async ({
   await page
     .getByLabel("Choose files", { exact: true })
     .setInputFiles({ name: "ocr.png", mimeType: "image/png", buffer: image });
+  let releaseWorker!: () => void;
+  const workerGate = new Promise<void>((resolve) => { releaseWorker = resolve; });
+  let workerRequested!: () => void;
+  const workerRequest = new Promise<void>((resolve) => { workerRequested = resolve; });
   await page.route("**/ocr/worker.min.js", async (route) => {
-    await new Promise((r) => setTimeout(r, 1500));
+    workerRequested();
+    await workerGate;
     await route.continue();
   });
   await page
     .getByRole("button", { name: "Recognize text", exact: true })
     .click();
+  await workerRequest;
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(page.getByText("Processing…", { exact: true })).toHaveCount(0);
-  await page.unroute("**/ocr/worker.min.js");
+  releaseWorker();
+  await page.unrouteAll({ behavior: "wait" });
   await page
     .getByRole("button", { name: "Recognize text", exact: true })
     .click();
