@@ -67,7 +67,8 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
   };
   start();
   if (invoice.logo) {
-    const bitmap = await createImageBitmap(await (await fetch(invoice.logo, { signal })).blob());
+    const bytes = Uint8Array.from(atob(invoice.logo.split(",")[1]), (char) => char.charCodeAt(0));
+    const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
     try {
       const scale = Math.min(220 / bitmap.width, 120 / bitmap.height);
       ctx.drawImage(bitmap, left, y, bitmap.width * scale, bitmap.height * scale);
