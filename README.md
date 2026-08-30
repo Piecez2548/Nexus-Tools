@@ -69,5 +69,7 @@ Only a successful validation on `main` can start the production job, and the rep
 
 The repository secret `VERCEL_TOKEN` must contain a token scoped to project `prj_bTrQ2QqhCPQ1yGxw99tKFkJkyaat`. Never commit it or paste it into logs. Vercel Git auto-deployment is not used; GitHub Actions owns deployment so failed validation cannot trigger a release. Rotate the token before its expiry and replace the GitHub secret.
 
+Configured on 2026-08-30: `VERCEL_TOKEN` is stored in GitHub Actions Secrets and `PRODUCTION_DEPLOY_ENABLED=true`. The token is scoped only to `nexus-tools` and expires on **2027-02-26**. No temporary team-wide token was needed. Rotate it in Vercel Account Settings → Tokens by selecting the team, then the `nexus-tools` project, and update the existing GitHub secret before expiry.
+
 Production test failure marks the workflow failed but does not automatically roll back a completed deployment. Review the traces and restore a known-good Vercel deployment when needed. Branch protection and future integration into the main Nexus navigation remain **Planned**.
 
