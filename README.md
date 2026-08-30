@@ -52,7 +52,7 @@ npm run lint
 
 The development URL is `http://127.0.0.1:5174/`. E2E tests use the compiled site on port 4174; rebuild before running them.
 
-Validation includes 26 unit/hook checks and 15 Chromium E2E workflows: PDF/image/ZIP/QR/text/invoice exports, draft persistence, input recovery, OCR cancellation, same-origin OCR assets, favorites/recent tools, keyboard focus and mobile file drops. Run `npm audit` to check current dependency advisories.
+Validation includes 27 unit/hook checks and 16 Chromium E2E workflows: PDF/image/ZIP/QR/text/invoice exports, draft persistence, input recovery, OCR cancellation, same-origin OCR assets, favorites/recent tools, keyboard focus and mobile file drops. Run `npm audit` to check current dependency advisories.
 
 ## Vercel deployment
 
@@ -97,3 +97,5 @@ Text counts include whitespace. UTF-16 counts combining marks separately and may
 Invoice creation automatically downloads a PDF (no print dialog); the result link remains available for another download. Thai text is shaped by the browser and embedded as high-resolution page images, so PDF text is not selectable/searchable. Long content flows across numbered A4 pages.
 
 Media QR modes encode HTTPS sharing links, not uploaded files. Host the media separately and grant intended viewers access. Scanning requires internet and may require opening the link or pressing play. Links may expire or stop working after file/access changes. Nexus Tools does not fetch, validate availability of, or store the media.
+
+OCR now prepares images/PDF pages with bounded upscaling, grayscale and automatic dark-background inversion. Users may override the background or crop a percentage region (applied to every PDF page). Optional Thai spacing cleanup preserves raw OCR and offers a separate download; it can remove intentional spaces and does not fix recognition errors. Small Thai text, names, digits, watermarks and clipped screenshots still require proofreading.

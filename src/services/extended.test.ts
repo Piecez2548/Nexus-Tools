@@ -1,8 +1,12 @@
+import { compactThaiSpacing } from "./ocrImage";
 import { describe, it, expect, beforeEach } from "vitest";
 import { transformText, qrPayload } from "./textTools";
 import { clearBackground } from "./imageTools";
 import { readDraft, saveLocal, removeLocal } from "./localData";
 describe("text and QR data integrity", () => {
+  it("only removes opted-in Thai spaces without rewriting names, numbers or English", () => {
+    expect(compactThaiSpacing("ค ว า ม  มั่ น ค ง\nPremium Thai 123 สม ซา ย")).toBe("ความมั่นคง\nPremium Thai 123 สมซาย");
+  });
   it("round trips Thai and emoji through UTF-8 Base64 and URL encoding", () => {
     const text = "สวัสดี 🌿 & + /";
     expect(

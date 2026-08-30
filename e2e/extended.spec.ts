@@ -381,3 +381,22 @@ test("OCR can be cancelled during initialization and then restarted", async ({
   ).toBeVisible({ timeout: 90000 });
   expect((await download(page)).toString()).toContain("NEXUS");
 });
+
+test("OCR prepares a dark screenshot and isolates the requested text area", async ({ page }) => {
+  const data = await page.evaluate(() => {
+    const c = document.createElement("canvas"); c.width = 800; c.height = 320;
+    const ctx = c.getContext("2d")!; ctx.fillStyle = "#15191c"; ctx.fillRect(0, 0, 800, 320);
+    ctx.fillStyle = "white"; ctx.font = "28px Arial";
+    ctx.fillText("IGNORE MENU", 30, 50); ctx.fillText("NEXUS TOOLS 12345", 30, 170);
+    return c.toDataURL("image/png").split(",")[1];
+  });
+  await open(page, "OCR — Thai & English");
+  await page.getByLabel("Choose files", { exact: true }).setInputFiles({ name: "dark.png", mimeType: "image/png", buffer: Buffer.from(data, "base64") });
+  await page.getByRole("checkbox", { name: /Read a selected area/ }).check();
+  await page.getByLabel("Top %", { exact: true }).fill("35");
+  await page.getByLabel("Height %", { exact: true }).fill("45");
+  await page.getByRole("button", { name: "Recognize text", exact: true }).click();
+  await expect(page.getByRole("link", { name: /Download nexus-ocr/ })).toBeVisible({ timeout: 90000 });
+  const text = (await download(page)).toString();
+  expect(text).toContain("NEXUS TOOLS 12345"); expect(text).not.toContain("IGNORE MENU");
+});

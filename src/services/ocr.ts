@@ -1,3 +1,4 @@
+import { prepareOcrImage, defaultOcrOptions, type OcrOptions } from "./ocrImage";
 import { ToolError } from "./errors";
 import { abortCheck, readBitmap } from "./imageTools";
 import { pdfPreview, renderPdfPage } from "./pdfTools";
@@ -8,6 +9,7 @@ export async function recognizeFile(
   language: string,
   signal: AbortSignal,
   onProgress: (value: number) => void,
+  options: OcrOptions = defaultOcrOptions,
 ) {
   if (!["eng", "tha", "eng+tha"].includes(language))
     throw new ToolError("text");
@@ -63,7 +65,7 @@ export async function recognizeFile(
           if (stopped) throw new ToolError("failed");
           const canvas = await renderPdfPage(doc, n, 1.5);
           const result = await Promise.race([
-            worker.recognize(canvas),
+            worker.recognize(prepareOcrImage(canvas, canvas.width, canvas.height, options)),
             interrupted,
           ]);
           texts.push(`--- ${n} ---\n${result.data.text}`);
@@ -74,8 +76,11 @@ export async function recognizeFile(
       }
     }
     const bitmap = await readBitmap(file);
-    bitmap.close();
-    return (await worker.recognize(file)).data.text;
+    try {
+      const prepared = prepareOcrImage(bitmap, bitmap.width, bitmap.height, options);
+      abortCheck(signal);
+      return (await worker.recognize(prepared)).data.text;
+    } finally { bitmap.close(); }
   };
   try {
     return await Promise.race([operation(), interrupted]);
