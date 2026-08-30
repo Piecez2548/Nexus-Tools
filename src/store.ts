@@ -1,0 +1,42 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { toolCatalog } from "./catalog";
+
+interface ToolsPreferences {
+  favorites: string[];
+  theme: "dark" | "light";
+  toggleFavorite: (id: string) => void;
+  toggleTheme: () => void;
+}
+export const useToolsPreferences = create<ToolsPreferences>()(
+  persist(
+    (set) => ({
+      favorites: [],
+      theme: "dark",
+      toggleFavorite: (id) =>
+        set((state) => ({
+          favorites: state.favorites.includes(id)
+            ? state.favorites.filter((value) => value !== id)
+            : [...state.favorites, id],
+        })),
+      toggleTheme: () =>
+        set((state) => ({ theme: state.theme === "dark" ? "light" : "dark" })),
+    }),
+    {
+      name: "nexus-tools-preferences",
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<ToolsPreferences> | undefined;
+        return {
+          ...current,
+          theme: saved?.theme === "light" ? "light" : "dark",
+          favorites: Array.isArray(saved?.favorites)
+            ? saved.favorites.filter((id) =>
+                toolCatalog.some((tool) => tool.id === id),
+              )
+            : [],
+        };
+      },
+    },
+  ),
+);
+
