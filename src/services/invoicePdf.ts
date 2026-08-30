@@ -75,20 +75,22 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
     y += 76;
   };
   start();
+  let headerBottom = 244;
   if (invoice.logo) {
     const bytes = Uint8Array.from(atob(invoice.logo.split(",")[1]), (char) => char.charCodeAt(0));
     const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
     try {
-      const scale = Math.min(220 / bitmap.width, 120 / bitmap.height);
+      const scale = Math.min(340 / bitmap.width, 204 / bitmap.height);
       ctx.drawImage(bitmap, left, y, bitmap.width * scale, bitmap.height * scale);
+      headerBottom = Math.max(headerBottom, y + bitmap.height * scale + 28);
 
     } finally { bitmap.close(); }
   }
   if (!invoice.logo) text("NEXUS", left, 110, true, 40);
   text({quotation:"ใบเสนอราคา",invoice:"ใบแจ้งหนี้",receipt:"ใบเสร็จรับเงิน"}[kind], right, 90, true, 52, "right");
   text({quotation:"Quotation",invoice:"Invoice",receipt:"Receipt"}[kind], right, 170, false, 30, "right");
-  ctx.fillStyle = "#172b4d"; ctx.fillRect(left, 244, right - left, 2);
-  y = 280;
+  ctx.fillStyle = "#172b4d"; ctx.fillRect(left, headerBottom, right - left, 2);
+  y = headerBottom + 36;
   // Wrap reference and date safely, including unusually long invoice numbers.
   await block(`${t("Document no.", "เลขที่")} ${invoice.number}   |   ${invoice.date}`, false, 20);
   if (invoice.sourceNumber) await block(`${t("Reference", "อ้างอิง")}: ${invoice.sourceNumber}`, false, 20);

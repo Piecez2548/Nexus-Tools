@@ -102,7 +102,7 @@ OCR now prepares images/PDF pages with bounded upscaling, grayscale and automati
 
 Invoices support an optional 100-character diagonal watermark at 18% opacity on every PDF page. It is saved with explicit local drafts; older drafts default to no watermark. This is a visual identifier, not encryption or tamper protection.
 
-Business PDFs use a formal white, navy and slate theme without colored page borders: thin header/footer rules, a left logo, a restrained bilingual right title, seller/customer columns, and pale gray table/total backgrounds. Optional project/package, payment details, notes and signatory names persist in drafts. Blank signature/date lines are provided; no sample signature or payment account is inserted. Quantity, unit price and tax calculations are unchanged.
+Business PDFs use a formal white, navy and slate theme without colored page borders: thin header/footer rules, a larger proportional left image/logo (up to 340 × 204 render pixels, without cropping), an adaptive header divider with 28 pixels of image clearance, a restrained bilingual right title, seller/customer columns, and pale gray table/total backgrounds. Optional project/package, payment details, notes and signatory names persist in drafts. Blank signature/date lines are provided; no sample signature or payment account is inserted. Quantity, unit price and tax calculations are unchanged.
 
 
 ## Business documents and media sharing
