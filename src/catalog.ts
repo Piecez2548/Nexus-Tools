@@ -128,8 +128,8 @@ export const toolCatalog = [
     icon: ReceiptText,
     name: copy("Invoice Generator", "สร้างใบแจ้งหนี้"),
     description: copy(
-      "Prepare a clear, print-ready invoice.",
-      "จัดทำใบแจ้งหนี้ พร้อมพิมพ์หรือบันทึก PDF",
+      "Create quotations, invoices and receipts with PDF preview and local history.",
+      "ใบเสนอราคา ใบแจ้งหนี้ และใบเสร็จ พร้อมพรีวิว PDF และประวัติ",
     ),
   },
   {
