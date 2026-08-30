@@ -5,6 +5,8 @@ export default tseslint.config(
   {
     ignores: [
       "dist/**",
+      "public/ocr/**",
+      "public/pdfjs/**",
       "node_modules/**",
       "test-results/**",
       "playwright-report/**",

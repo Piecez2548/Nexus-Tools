@@ -4,6 +4,9 @@ import { toolCatalog } from "./catalog";
 
 interface ToolsPreferences {
   favorites: string[];
+  recent: string[];
+  recordRecent: (id: string) => void;
+  clearRecent: () => void;
   theme: "dark" | "light";
   toggleFavorite: (id: string) => void;
   toggleTheme: () => void;
@@ -12,6 +15,12 @@ export const useToolsPreferences = create<ToolsPreferences>()(
   persist(
     (set) => ({
       favorites: [],
+      recent: [],
+      recordRecent: (id) =>
+        set((state) => ({
+          recent: [id, ...state.recent.filter((v) => v !== id)].slice(0, 8),
+        })),
+      clearRecent: () => set({ recent: [] }),
       theme: "dark",
       toggleFavorite: (id) =>
         set((state) => ({
@@ -28,6 +37,11 @@ export const useToolsPreferences = create<ToolsPreferences>()(
         const saved = persisted as Partial<ToolsPreferences> | undefined;
         return {
           ...current,
+          recent: Array.isArray(saved?.recent)
+            ? saved.recent
+                .filter((id) => toolCatalog.some((t) => t.id === id))
+                .slice(0, 8)
+            : [],
           theme: saved?.theme === "light" ? "light" : "dark",
           favorites: Array.isArray(saved?.favorites)
             ? saved.favorites.filter((id) =>
@@ -39,4 +53,3 @@ export const useToolsPreferences = create<ToolsPreferences>()(
     },
   ),
 );
-

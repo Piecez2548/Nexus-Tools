@@ -124,10 +124,17 @@ export async function processImage(
     bitmap.close();
   }
 }
-export async function generateQr(text: string): Promise<ToolResult> {
+export async function generateQr(text: string, format = 'svg'): Promise<ToolResult> {
   if (!text.trim() || new TextEncoder().encode(text).length > 1000)
     throw new ToolError("qr");
-  const { toString } = await import("qrcode");
+  if (!['svg','png'].includes(format)) throw new ToolError('format');
+  const { toString, toCanvas } = await import("qrcode");
+  if(format==='png') {
+    const canvas=document.createElement('canvas');
+    await toCanvas(canvas,text,{errorCorrectionLevel:'M',margin:4,width:512});
+    const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new ToolError('format')),'image/png'));
+    return {blob,filename:'nexus-qr.png'};
+  }
   const svg = await toString(text, {
     type: "svg",
     errorCorrectionLevel: "M",

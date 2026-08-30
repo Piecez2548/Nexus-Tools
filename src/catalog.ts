@@ -142,6 +142,96 @@ export const toolCatalog = [
       "นับคำ ตัวอักษร และย่อหน้าของข้อความ",
     ),
   },
+  {
+    id: "pdf-studio",
+    category: "pdf",
+    icon: Files,
+    name: copy("PDF Page Manager", "จัดการหน้า PDF"),
+    description: copy(
+      "Preview, reorder, rotate, delete and watermark pages.",
+      "ดูตัวอย่าง จัดเรียง หมุน ลบหน้า และใส่ลายน้ำ",
+    ),
+  },
+  {
+    id: "pdf-text",
+    category: "pdf",
+    icon: TextCursorInput,
+    name: copy("PDF Text Replacement", "แทนที่ข้อความ PDF"),
+    description: copy(
+      "Replace a region with text; edited pages become images.",
+      "แทนที่บริเวณข้อความ โดยแปลงหน้าที่แก้เป็นภาพ",
+    ),
+  },
+  {
+    id: "images-pdf",
+    category: "pdf",
+    icon: Image,
+    name: copy("Images to PDF", "รูปภาพเป็น PDF"),
+    description: copy(
+      "Combine photos into ordered A4 pages.",
+      "รวมรูปภาพเป็น PDF ขนาด A4 ตามลำดับ",
+    ),
+  },
+  {
+    id: "image-studio",
+    category: "image",
+    icon: Image,
+    name: copy("Image Crop & Watermark", "ครอปภาพและใส่ลายน้ำ"),
+    description: copy(
+      "Crop, resize and add a text watermark.",
+      "ครอป ปรับขนาด และใส่ลายน้ำข้อความ",
+    ),
+  },
+  {
+    id: "batch-images",
+    category: "image",
+    icon: ImageDown,
+    name: copy("Batch Images & ZIP", "จัดการรูปเป็นชุดและ ZIP"),
+    description: copy(
+      "Convert and resize multiple images into one ZIP.",
+      "แปลงและปรับขนาดหลายรูปพร้อมดาวน์โหลด ZIP",
+    ),
+  },
+  {
+    id: "remove-background",
+    category: "image",
+    icon: Scissors,
+    name: copy("Solid Background Remover", "ลบพื้นหลังสีเรียบ"),
+    description: copy(
+      "Remove edge-connected background color to transparent PNG.",
+      "ลบสีพื้นหลังที่ติดขอบภาพเป็น PNG โปร่งใส",
+    ),
+  },
+  {
+    id: "ocr",
+    category: "professional",
+    icon: ScanText,
+    name: copy("OCR \u2014 Thai & English", "OCR อ่านไทยและอังกฤษ"),
+    description: copy(
+      "Extract text from images or scanned PDFs on your device.",
+      "อ่านข้อความจากรูปหรือ PDF สแกนบนอุปกรณ์ของคุณ",
+    ),
+  },
+  {
+    id: "text-studio",
+    category: "text",
+    icon: TextCursorInput,
+    name: copy("Text Utilities", "จัดการข้อความ"),
+    description: copy(
+      "Change case, clean spaces, remove duplicates and compare.",
+      "เปลี่ยนตัวพิมพ์ ล้างช่องว่าง ลบซ้ำ และเปรียบเทียบ",
+    ),
+  },
+  {
+    id: "developer-tools",
+    category: "convert",
+    icon: Blocks,
+    name: copy("Developer Utilities", "เครื่องมือนักพัฒนา"),
+    description: copy(
+      "JSON formatting, URL and UTF-8 Base64 encoding.",
+      "จัดรูปแบบ JSON และเข้ารหัส URL / Base64 UTF-8",
+    ),
+  },
 ] as const;
 export type Tool = (typeof toolCatalog)[number];
 export type ToolId = Tool["id"];
@@ -168,4 +258,3 @@ export function filterTools(
       )
     : tools;
 }
-

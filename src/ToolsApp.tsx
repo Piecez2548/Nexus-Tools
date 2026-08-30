@@ -18,15 +18,28 @@ import {
 } from "lucide-react";
 import { useLanguageStore } from "@/shared/languageStore";
 import { useModalA11y } from "@/shared/useModalA11y";
-import { categories, filterTools, type CategoryId, type Tool } from "./catalog";
+import {
+  categories,
+  toolCatalog,
+  filterTools,
+  type CategoryId,
+  type Tool,
+} from "./catalog";
 import { useToolsPreferences } from "./store";
 
 const ToolWorkspace = lazy(() => import("./components/ToolWorkspace"));
 
 export default function ToolsApp() {
   const { language, setLanguage } = useLanguageStore();
-  const { theme, toggleTheme, favorites, toggleFavorite } =
-    useToolsPreferences();
+  const {
+    theme,
+    toggleTheme,
+    favorites,
+    toggleFavorite,
+    recent,
+    recordRecent,
+    clearRecent,
+  } = useToolsPreferences();
   const text = (en: string, th: string) => (language === "th" ? th : en);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryId>("all");
@@ -297,6 +310,32 @@ export default function ToolsApp() {
               </button>
             ))}
           </div>
+          {recent.length > 0 && (
+            <section
+              className="recent-tools"
+              aria-label={text("Recently used", "ใช้ล่าสุด")}
+            >
+              <strong>{text("Recently used", "ใช้ล่าสุด")}</strong>
+              {recent.map((id) => {
+                const tool = toolCatalog.find((t) => t.id === id);
+                return tool ? (
+                  <button
+                    key={id}
+                    className="button secondary"
+                    onClick={() => {
+                      recordRecent(id);
+                      setActiveTool(tool);
+                    }}
+                  >
+                    {tool.name[language]}
+                  </button>
+                ) : null;
+              })}
+              <button className="button secondary" onClick={clearRecent}>
+                {text("Clear recent", "ล้างรายการล่าสุด")}
+              </button>
+            </section>
+          )}
           <section id="tool-list" className="tool-section">
             <div className="section-heading">
               <div>
@@ -338,7 +377,10 @@ export default function ToolsApp() {
                   >
                     <button
                       className="tool-card-main"
-                      onClick={() => setActiveTool(tool)}
+                      onClick={() => {
+                        recordRecent(tool.id);
+                        setActiveTool(tool);
+                      }}
                       aria-label={`${text("Open", "เปิด")} ${tool.name[language]}`}
                     >
                       <span className="tool-icon">
@@ -428,15 +470,15 @@ export default function ToolsApp() {
                     "ไฟล์ของฉันถูกส่งไปที่ไหน?",
                   ),
                   text(
-                    "Processing runs in this browser. Files are not sent to a processing server. Closing a tool clears its inputs; downloaded files remain on your device.",
-                    "ประมวลผลในเบราว์เซอร์ ไม่ส่งไฟล์ไปประมวลผลที่เซิร์ฟเวอร์ เมื่อปิดเครื่องมือข้อมูลที่กรอกจะถูกล้าง ส่วนไฟล์ที่ดาวน์โหลดยังอยู่บนอุปกรณ์",
+                    "Processing runs in this browser. Files are not sent to a processing server. Closing a tool clears its inputs, except invoice drafts and settings you explicitly save on this device. Delete saved drafts/settings using the tool controls. Downloaded files remain on your device.",
+                    "ประมวลผลในเบราว์เซอร์ ไม่ส่งไฟล์ไปประมวลผลที่เซิร์ฟเวอร์ ปิดเครื่องมือจะล้างข้อมูล ยกเว้นแบบร่างและการตั้งค่าที่คุณเลือกบันทึกบนอุปกรณ์ ซึ่งลบได้จากปุ่มในเครื่องมือ ส่วนไฟล์ดาวน์โหลดจะยังอยู่",
                   ),
                 ],
                 [
                   text("Are there file limits?", "มีข้อจำกัดของไฟล์หรือไม่?"),
                   text(
-                    "PDF tools accept up to 50 MB total and 20 files. Image tools accept JPEG, PNG and WebP up to 20 MB and 24 megapixels. Protected PDFs are not supported. Image conversion produces a still image.",
-                    "PDF รองรับรวมไม่เกิน 50 MB และ 20 ไฟล์ รูปภาพรองรับ JPEG, PNG, WebP ไม่เกิน 20 MB และ 24 ล้านพิกเซล ไม่รองรับ PDF ที่ล็อกรหัสผ่าน การแปลงรูปจะได้ภาพนิ่ง",
+                    "Merge/split: 50 MB, 500 pages. PDF page editing: 100 pages. OCR: 20 MB, 10 PDF pages. Images: JPEG, PNG or WebP up to 20 MB and 24 megapixels; batch tools up to 20 files, 50 MB total. Protected PDFs are not supported. Image output is a still image.",
+                    "รวม/แยก PDF: 50 MB, 500 หน้า จัดการหน้า PDF: 100 หน้า OCR: 20 MB, PDF 10 หน้า รูปภาพ JPEG/PNG/WebP ไฟล์ละ 20 MB, 24 ล้านพิกเซล งานเป็นชุดสูงสุด 20 ไฟล์รวม 50 MB ไม่รองรับ PDF ล็อกรหัส ภาพส่งออกเป็นภาพนิ่ง",
                   ),
                 ],
               ].map(([question, answer]) => (
@@ -479,4 +521,3 @@ export default function ToolsApp() {
     </div>
   );
 }
-

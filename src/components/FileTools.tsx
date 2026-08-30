@@ -74,7 +74,7 @@ export default function FileTools({ mode }: { mode: Mode }) {
             </label>
           ) : (
             <>
-              <label className="file-drop">
+              <label className="file-drop" onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(runner.busy)return;const incoming=Array.from(event.dataTransfer.files);setFiles(mode==="merge-pdf"?[...files,...incoming].slice(0,21):incoming.slice(0,1));runner.reset();}}>
                 <FileUp size={28} />
                 <strong>
                   {t(

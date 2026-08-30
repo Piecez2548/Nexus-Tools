@@ -10,14 +10,21 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "lint": "eslint .",
-    "deploy": "node scripts/deploy.mjs"
+    "deploy": "node scripts/deploy.mjs",
+    "prebuild": "node scripts/prepare-assets.mjs",
+    "predev": "node scripts/prepare-assets.mjs"
   },
   "dependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "@tesseract.js-data/tha": "^1.0.0",
+    "fflate": "^0.8.3",
     "lucide-react": "^1.24.0",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.3.289",
     "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "tesseract.js": "^7.0.0",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

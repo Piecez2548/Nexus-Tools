@@ -1,14 +1,22 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useLanguageStore } from "@/shared/languageStore";
 import { invoiceTotals, type InvoiceItem } from "../services/calculations";
 import { createInvoice } from "../services/invoice";
 import { useToolRunner } from "../hooks/useToolRunner";
 import ResultPanel from "./ResultPanel";
+import { readDraft, saveLocal, removeLocal } from "../services/localData";
+import { prepareLogo } from "../services/logo";
 export default function InvoiceTool() {
   const { language } = useLanguageStore();
   const t = (en: string, th: string) => (language === "th" ? th : en);
   const runner = useToolRunner();
+  const logoController = useRef<AbortController | null>(null);
+  useEffect(() => () => logoController.current?.abort(), []);
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [logo, setLogo] = useState(""),
+    [draftMessage, setDraftMessage] = useState("");
+
   const [seller, setSeller] = useState(""),
     [customer, setCustomer] = useState(""),
     [number, setNumber] = useState("INV-001");
@@ -39,6 +47,7 @@ export default function InvoiceTool() {
           event.preventDefault();
           void runner.run(() =>
             createInvoice({
+              logo,
               seller,
               customer,
               number,
@@ -51,7 +60,126 @@ export default function InvoiceTool() {
           );
         }}
       >
-        <fieldset disabled={runner.busy} className="tool-fields">
+        <fieldset disabled={runner.busy || logoBusy} className="tool-fields">
+          <div className="settings-history">
+            <button
+              className="button secondary"
+              type="button"
+              onClick={() => {
+                const ok = saveLocal("invoice-draft", {
+                  seller,
+                  customer,
+                  number,
+                  date,
+                  currency,
+                  tax,
+                  items,
+                  language,
+                  logo,
+                });
+                setDraftMessage(
+                  ok
+                    ? t(
+                        "Draft saved on this device.",
+                        "บันทึกแบบร่างบนอุปกรณ์แล้ว",
+                      )
+                    : t("Storage unavailable.", "พื้นที่จัดเก็บไม่พร้อม"),
+                );
+              }}
+            >
+              {t("Save draft", "บันทึกแบบร่าง")}
+            </button>
+            <button
+              className="button secondary"
+              type="button"
+              onClick={() => {
+                const v = readDraft();
+                if (!v) {
+                  setDraftMessage(
+                    t("No valid saved draft.", "ไม่มีแบบร่างที่ใช้ได้"),
+                  );
+                  return;
+                }
+                setSeller(v.seller);
+                setCustomer(v.customer);
+                setNumber(v.number);
+                setDate(v.date);
+                setCurrency(v.currency);
+                setTax(v.tax);
+                setItems(v.items);
+                setLogo(v.logo ?? "");
+                runner.reset();
+                setDraftMessage(t("Draft restored.", "เรียกคืนแบบร่างแล้ว"));
+              }}
+            >
+              {t("Load draft / reuse items", "โหลดแบบร่าง / ใช้รายการเดิม")}
+            </button>
+            <button
+              className="button secondary"
+              type="button"
+              onClick={() => {
+                setDraftMessage(
+                  removeLocal("invoice-draft")
+                    ? t("Saved draft deleted.", "ลบแบบร่างที่บันทึกแล้ว")
+                    : t("Storage unavailable.", "พื้นที่จัดเก็บไม่พร้อม"),
+                );
+              }}
+            >
+              {t("Delete saved draft", "ลบแบบร่างที่บันทึก")}
+            </button>
+          </div>
+          <p role="status">{draftMessage}</p>
+          <label className="field">
+            {t("Business logo (optional)", "โลโก้ธุรกิจ (ไม่บังคับ)")}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                logoController.current?.abort();
+                const current = new AbortController();
+                logoController.current = current;
+                setLogoBusy(true);
+                try {
+                  const url = await prepareLogo(file, current.signal);
+                  if (current.signal.aborted) return;
+                  setLogo(url);
+                  runner.reset();
+                } catch {
+                  if (current.signal.aborted) return;
+                  setDraftMessage(
+                    t(
+                      "Cannot load logo. Use a smaller valid image.",
+                      "อ่านโลโก้ไม่ได้ ลองภาพที่มีขนาดเล็กลง",
+                    ),
+                  );
+                } finally {
+                  if (!current.signal.aborted) setLogoBusy(false);
+                }
+              }}
+            />
+          </label>
+          {logo && (
+            <div>
+              <img
+                src={logo}
+                alt={t("Invoice logo", "โลโก้ใบแจ้งหนี้")}
+                style={{ maxWidth: 180, maxHeight: 100 }}
+              />
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  setLogo("");
+                  runner.reset();
+                }}
+              >
+                {t("Remove logo", "ลบโลโก้")}
+              </button>
+            </div>
+          )}
           <div className="field-row">
             <label className="field">
               {t("Seller / business", "ผู้ขาย / ธุรกิจ")}
@@ -204,8 +332,8 @@ export default function InvoiceTool() {
           </div>
           <p className="field-hint">
             {t(
-              "Creates a printable HTML invoice. Open the download and print to PDF. This is not a certified tax invoice; no invoice data is saved by the app.",
-              "สร้างใบแจ้งหนี้ HTML เปิดไฟล์ที่ดาวน์โหลดแล้วพิมพ์เป็น PDF เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง และแอปไม่บันทึกข้อมูลใบแจ้งหนี้",
+              "Creates a printable HTML invoice. Open the download and print to PDF. This is not a certified tax invoice; invoice data is stored only when you choose Save draft. It remains on this device until you delete it.",
+              "สร้างใบแจ้งหนี้ HTML เปิดไฟล์ที่ดาวน์โหลดแล้วพิมพ์เป็น PDF เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง ข้อมูลจะบันทึกบนอุปกรณ์เฉพาะเมื่อกดบันทึกแบบร่าง และคงอยู่จนกว่าจะลบ",
             )}
           </p>
           <button className="button" type="submit">
@@ -217,4 +345,3 @@ export default function InvoiceTool() {
     </>
   );
 }
-

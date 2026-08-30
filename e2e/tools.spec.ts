@@ -18,7 +18,7 @@ test("catalogue, favorites, search, language and theme persist", async ({
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await expect(page.locator(".tool-card")).toHaveCount(8);
+  await expect(page.locator(".tool-card")).toHaveCount(17);
   await page
     .getByRole("button", { name: "Favorite Merge PDF", exact: true })
     .click();

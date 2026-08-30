@@ -6,6 +6,11 @@ import { categories, type Tool } from "../catalog";
 import FileTools from "./FileTools";
 import TextTools from "./TextTools";
 import InvoiceTool from "./InvoiceTool";
+import QrTool from "./QrTool";
+import PdfStudio from "./PdfStudio";
+import ImageStudio from "./ImageStudio";
+import OcrTool from "./OcrTool";
+import ExtendedTextTools from "./ExtendedTextTools";
 export default function ToolWorkspace({
   tool,
   onClose,
@@ -58,7 +63,20 @@ export default function ToolWorkspace({
           </button>
         </div>
         <p className="workspace-description">{tool.description[language]}</p>
-        {tool.id === "invoice" ? (
+        {tool.id === "qr-code" ? (
+          <QrTool />
+        ) : tool.id === "pdf-studio" || tool.id === "pdf-text" ? (
+          <PdfStudio textEditor={tool.id === "pdf-text"} />
+        ) : tool.id === "image-studio" ||
+          tool.id === "batch-images" ||
+          tool.id === "images-pdf" ||
+          tool.id === "remove-background" ? (
+          <ImageStudio mode={tool.id} />
+        ) : tool.id === "ocr" ? (
+          <OcrTool />
+        ) : tool.id === "text-studio" || tool.id === "developer-tools" ? (
+          <ExtendedTextTools developer={tool.id === "developer-tools"} />
+        ) : tool.id === "invoice" ? (
           <InvoiceTool />
         ) : tool.id === "unit-converter" || tool.id === "word-counter" ? (
           <TextTools mode={tool.id} />
@@ -75,4 +93,3 @@ export default function ToolWorkspace({
     </div>
   );
 }
-

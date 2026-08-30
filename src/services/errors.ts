@@ -6,6 +6,7 @@ export class ToolError extends Error {
   }
 }
 export const messages: Record<string, { en: string; th: string }> = {
+  text: { en: "Invalid text format or encoding. Check JSON, URL or UTF-8 Base64 input.", th: "รูปแบบข้อความหรือรหัสไม่ถูกต้อง กรุณาตรวจ JSON, URL หรือ Base64 UTF-8" },
   files: {
     en: "Choose the required files first.",
     th: "กรุณาเลือกไฟล์ให้ครบก่อนเริ่ม",
