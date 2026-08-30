@@ -306,6 +306,11 @@ test("OCR reads a real image using locally hosted Thai/English models", async ({
   ).toBeVisible({ timeout: 90000 });
   expect((await download(page)).toString()).toMatch(/NEXUS\s+TOOLS\s+12345/i);
   expect(external).toEqual([]);
+  await page.getByRole("textbox", {name:"Edit recognized text",exact:true}).fill("แก้ไขแล้ว NEXUS 12345");
+  const corrected = page.waitForEvent("download");
+  await page.getByRole("button", {name:"Download corrected text",exact:true}).click();
+  const correctedFile = await corrected;
+  expect((await readFile((await correctedFile.path())!)).toString()).toBe("แก้ไขแล้ว NEXUS 12345");
 });
 test("mobile file drop, recent history and invalid crop recovery", async ({
   page,

@@ -13,3 +13,7 @@ Thumbs.db
 
 public/ocr/
 public/pdfjs/
+
+.env*
+
+.media-admin-key

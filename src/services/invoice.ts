@@ -1,7 +1,13 @@
+import { promptPayPayload } from "./promptPay";
 import { invoiceTotals, type InvoiceItem } from "./calculations";
 import { ToolError } from "./errors";
 import type { ToolResult } from "./files";
 export interface Invoice {
+  kind?: "quotation" | "invoice" | "receipt";
+  sourceNumber?: string;
+  paidConfirmed?: boolean;
+  promptPayPhone?: string;
+  promptPayConfirmed?: boolean;
   logo?: string;
   watermark?: string;
   title?: string;
@@ -27,16 +33,17 @@ export const escapeHtml = (value: string) =>
       ]!,
   );
 export function validateInvoice(invoice: Invoice) {
+  if (!invoice || ![invoice.date,invoice.tax,invoice.currency].every(v=>typeof v === "string") || !Array.isArray(invoice.items) || !["en","th"].includes(invoice.language)) throw new ToolError("invoice");
   if (
     ![invoice.seller, invoice.customer, invoice.number].every(
-      (value) => value.trim() && value.length <= 2000,
+      (value) => typeof value === "string" && value.trim() && value.length <= 2000,
     ) ||
     !/^\d{4}-\d{2}-\d{2}$/.test(invoice.date) ||
     !["THB", "USD", "EUR"].includes(invoice.currency)
   )
     throw new ToolError("invoice");
   if (invoice.watermark !== undefined && (typeof invoice.watermark !== "string" || invoice.watermark.length > 100)) throw new ToolError("invoice");
-  for (const key of ["title", "payment", "notes", "approver", "recipient"] as const) {
+  for (const key of ["title", "payment", "notes", "approver", "recipient", "sourceNumber", "promptPayPhone"] as const) {
     const value = invoice[key];
     if (value !== undefined && (typeof value !== "string" || value.length > 1000)) throw new ToolError("invoice");
   }
@@ -47,7 +54,15 @@ export function validateInvoice(invoice: Invoice) {
   )
     throw new ToolError("invoice");
   if(invoice.logo && (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(invoice.logo) || invoice.logo.length>1000000)) throw new ToolError("invoice");
-  return invoiceTotals(invoice.items, invoice.tax);
+  if (invoice.kind && !["quotation", "invoice", "receipt"].includes(invoice.kind)) throw new ToolError("invoice");
+  if (invoice.kind === "receipt" && invoice.paidConfirmed !== true) throw new ToolError("receipt");
+  if (invoice.items.some(i=>!i || ![i.description,i.quantity,i.price].every(v=>typeof v === "string"))) throw new ToolError("invoice");
+  const totals = invoiceTotals(invoice.items, invoice.tax);
+  if (invoice.promptPayPhone?.trim()) {
+    if (invoice.currency !== "THB" || invoice.promptPayConfirmed !== true) throw new ToolError("promptpay");
+    promptPayPayload(invoice.promptPayPhone, totals.total);
+  }
+  return totals;
 }
 export function createInvoice(invoice: Invoice): ToolResult {
   const totals = validateInvoice(invoice);

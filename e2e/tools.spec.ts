@@ -185,6 +185,7 @@ test("invoice downloads a real PDF directly and calculates tax", async ({
     .getByRole("button", { name: "Open Invoice Generator", exact: true })
     .click();
   await page.getByLabel("Seller / business").fill("Nexus Demo");
+  await page.getByLabel("Invoice number").fill("INV-001");
   await page
     .getByLabel("Customer", { exact: true })
     .fill("<img src=x onerror=alert(1)>");
@@ -211,6 +212,7 @@ test("invoice downloads a real PDF directly and calculates tax", async ({
     await page.getByLabel(`Description ${i}`, { exact: true }).fill("บริการออกแบบและพัฒนาเว็บไซต์พร้อมดูแลระบบ ".repeat(10));
   }
   await page.getByLabel("Invoice watermark (optional)").fill("สำเนา - สำหรับลูกค้าเท่านั้น");
+  await page.getByRole("button",{name:"Use next document number",exact:true}).click();
   const longDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "Create invoice", exact: true }).click();
   const longFile = await longDownload;

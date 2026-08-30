@@ -6,6 +6,10 @@ export class ToolError extends Error {
   }
 }
 export const messages: Record<string, { en: string; th: string }> = {
+  storage: { en: "Cannot save locally, or history is full (100). Export a backup and free space.", th: "จัดเก็บไม่ได้หรือประวัติเต็ม (100 เอกสาร) กรุณาสำรองข้อมูลและเพิ่มพื้นที่" },
+  duplicate: { en: "This number already belongs to a different document. Use the next document number.", th: "เลขนี้ใช้กับเอกสารอื่นแล้ว กรุณากดใช้เลขเอกสารถัดไป" },
+  receipt: { en: "Confirm that payment was received before issuing a receipt.", th: "ยืนยันว่าได้รับเงินแล้วก่อนออกใบเสร็จ" },
+  promptpay: { en: "Verify a registered Thai mobile PromptPay number, THB currency and positive amount.", th: "ตรวจเบอร์มือถือพร้อมเพย์ที่ลงทะเบียน ยืนยันผู้รับ เลือก THB และยอดมากกว่า 0" },
   text: { en: "Invalid text format or encoding. Check JSON, URL or UTF-8 Base64 input.", th: "รูปแบบข้อความหรือรหัสไม่ถูกต้อง กรุณาตรวจ JSON, URL หรือ Base64 UTF-8" },
   files: {
     en: "Choose the required files first.",

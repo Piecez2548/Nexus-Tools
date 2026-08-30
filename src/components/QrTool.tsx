@@ -1,3 +1,4 @@
+import MediaUpload from "./MediaUpload";
 import { useState } from "react";
 import { useLanguageStore } from "@/shared/languageStore";
 import { qrPayload, type QrKind } from "../services/textTools";
@@ -85,6 +86,7 @@ export default function QrTool() {
               </select>
             </label>
           )}
+          {(kind === "image" || kind === "video") && <MediaUpload kind={kind} onSelect={url=>{setFields({...fields,url});runner.reset();}} />}
           {keys.map((key) => (
             <label className="field" key={key}>
               {labels[key][th ? 1 : 0]}
@@ -120,8 +122,8 @@ export default function QrTool() {
                 ? "อัปโหลดสื่อไปยังบริการที่คุณใช้อยู่ก่อน เช่น Google Drive หรือ YouTube แล้ววางลิงก์แชร์ HTTPS ตั้งสิทธิ์ให้ผู้ที่มีลิงก์ดูได้ และลองเปิดในหน้าต่างไม่ระบุตัวตนก่อนแจก QR"
                 : "Upload media to your preferred host, such as Google Drive or YouTube, then paste its HTTPS sharing link. Allow viewers with the link and test it in a private browser window before sharing the QR."}</p>
               <p>{th
-                ? "Nexus Tools ไม่อัปโหลดหรือเก็บไฟล์สื่อ QR เก็บเฉพาะลิงก์ ผู้มี QR เข้าถึงสื่อได้ตามสิทธิ์ที่คุณตั้ง หากลบไฟล์ เปลี่ยนสิทธิ์ หรือลิงก์หมดอายุ QR จะเปิดสื่อไม่ได้"
-                : "Nexus Tools does not upload or store media. The QR contains only the link; access follows your sharing permissions. Deleting the file, changing access or an expired link can stop it working."}</p>
+                ? "เมื่อใช้ลิงก์ภายนอก QR เก็บเฉพาะลิงก์ ส่วนการอัปโหลด Nexus จะเก็บสื่อบน Vercel ผู้มี QR เข้าถึงสื่อได้ตามสิทธิ์ที่คุณตั้ง หากลบไฟล์ เปลี่ยนสิทธิ์ หรือลิงก์หมดอายุ QR จะเปิดสื่อไม่ได้"
+                : "External links remain on their host; Nexus uploads are stored on Vercel. The QR contains only the link; access follows your sharing permissions. Deleting the file, changing access or an expired link can stop it working."}</p>
             </div>
           )}
           <label className="field">

@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react";
+const PdfPreview = lazy(() => import("./PdfPreview"));
 import { downloadFile } from "@/shared/download";
 import { defaultOcrOptions, compactThaiSpacing } from "../services/ocrImage";
 import { ToolError } from "../services/errors";
@@ -16,6 +18,7 @@ export default function OcrTool() {
   const runner = useToolRunner();
   const [options, setOptions] = useState(defaultOcrOptions);
   const [preview, setPreview] = useState("");
+  const [edited, setEdited] = useState("");
   const [compact, setCompact] = useState(false);
   useEffect(() => {
     if (!files[0]?.type.startsWith("image/")) { setPreview(""); return; }
@@ -42,7 +45,7 @@ export default function OcrTool() {
               setProgress,
               options,
             );
-            if (!signal.aborted) setText(output);
+            if (!signal.aborted) { setText(output); setEdited(output); }
             return {
               blob: new Blob([output], { type: "text/plain;charset=utf-8" }),
               filename: "nexus-ocr.txt",
@@ -99,6 +102,13 @@ export default function OcrTool() {
         </fieldset>
       </form>
       {runner.busy && <p role="status">OCR: {Math.round(progress * 100)}%</p>}
+      {text && <section className="ocr-review" aria-label={th ? "ตรวจแก้ OCR เทียบต้นฉบับ" : "OCR side-by-side review"}>
+        <div>{preview ? <img src={preview} alt={th ? "ต้นฉบับสำหรับตรวจเทียบ" : "Source for comparison"} style={{width:"100%"}} /> : files[0] && <Suspense fallback={<p>PDF…</p>}><PdfPreview blob={files[0]} /></Suspense>}</div>
+        <div><label className="field">{th ? "แก้ไขข้อความก่อนดาวน์โหลด" : "Edit recognized text"}<textarea rows={18} value={edited} onChange={e=>setEdited(e.target.value)} /></label>
+          <button type="button" className="button" onClick={()=>downloadFile("nexus-ocr-corrected.txt", edited,"text/plain;charset=utf-8")}>{th ? "ดาวน์โหลดข้อความที่แก้แล้ว" : "Download corrected text"}</button>
+          <button type="button" className="button secondary" onClick={()=>setEdited(text)}>{th ? "คืนข้อความดิบ" : "Restore raw text"}</button>
+        </div>
+      </section>}
       {text && (
         <label className="field">
           {th

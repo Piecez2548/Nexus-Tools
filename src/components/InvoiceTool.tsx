@@ -1,3 +1,6 @@
+import DocumentBook from "./DocumentBook";
+import { suggestNumber, storeDocument, type DocumentKind } from "../services/documentBook";
+import type { Invoice } from "../services/invoice";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useLanguageStore } from "@/shared/languageStore";
@@ -14,6 +17,9 @@ export default function InvoiceTool() {
   const runner = useToolRunner();
   const logoController = useRef<AbortController | null>(null);
   useEffect(() => () => logoController.current?.abort(), []);
+  const [previewOnly, setPreviewOnly] = useState(false);
+  const [kind, setKind] = useState<DocumentKind>("invoice"), [sourceNumber, setSourceNumber] = useState("");
+  const [paidConfirmed, setPaidConfirmed] = useState(false), [promptPayPhone, setPromptPayPhone] = useState(""), [promptPayConfirmed, setPromptPayConfirmed] = useState(false);
   const [details, setDetails] = useState({ title: "", payment: "", notes: "", approver: "", recipient: "" });
   const [watermark, setWatermark] = useState("");
   const [logoBusy, setLogoBusy] = useState(false);
@@ -22,7 +28,7 @@ export default function InvoiceTool() {
 
   const [seller, setSeller] = useState(""),
     [customer, setCustomer] = useState(""),
-    [number, setNumber] = useState("INV-001");
+    [number, setNumber] = useState(() => suggestNumber("invoice", ""));
   const [date, setDate] = useState(""),
     [currency, setCurrency] = useState("THB"),
     [tax, setTax] = useState("0");
@@ -42,6 +48,12 @@ export default function InvoiceTool() {
     );
     runner.reset();
   };
+  const current: Invoice = { logo, watermark, ...details, seller, customer, number, date, currency, tax, items, language, kind, sourceNumber, paidConfirmed, promptPayPhone, promptPayConfirmed };
+  const loadDocument = (v: Invoice) => {
+    setSeller(v.seller); setCustomer(v.customer); setNumber(v.number); setDate(v.date); setCurrency(v.currency); setTax(v.tax); setItems(v.items.map(i=>({...i})));
+    setLogo(v.logo ?? ""); setWatermark(v.watermark ?? ""); setKind(v.kind ?? "invoice"); setSourceNumber(v.sourceNumber ?? ""); setPaidConfirmed(false); setPromptPayPhone(v.promptPayPhone ?? ""); setPromptPayConfirmed(false);
+    setDetails({title:v.title??"",payment:v.payment??"",notes:v.notes??"",approver:v.approver??"",recipient:v.recipient??""}); runner.reset();
+  };
   return (
     <>
       <form
@@ -49,31 +61,31 @@ export default function InvoiceTool() {
         onSubmit={(event) => {
           event.preventDefault();
           void runner.run(async (signal) => {
-            const result = await createInvoicePdf({
-              logo,
-              watermark,
-              ...details,
-              seller,
-              customer,
-              number,
-              date,
-              currency,
-              tax,
-              items,
-              language,
-            }, signal);
-            if (!signal.aborted) downloadFile(result.filename, result.blob, "application/pdf");
+            const previewOnly = (event.nativeEvent as SubmitEvent).submitter?.getAttribute("value") === "preview";
+            setPreviewOnly(previewOnly);
+            const result = await createInvoicePdf(current, signal);
+            if (!signal.aborted && !previewOnly) {
+              await storeDocument(current);
+              downloadFile(result.filename, result.blob, "application/pdf");
+            }
             return result;
           });
         }}
       >
         <fieldset disabled={runner.busy || logoBusy} className="tool-fields">
+          <DocumentBook invoice={current} onLoad={loadDocument} />
+          <label className="field">{t("Document type", "ประเภทเอกสาร")}<select value={kind} onChange={e=>{const next=e.target.value as DocumentKind; setSourceNumber(""); setKind(next); setNumber(suggestNumber(next,date)); setPaidConfirmed(false);}}><option value="quotation">{t("Quotation","ใบเสนอราคา")}</option><option value="invoice">{t("Invoice","ใบแจ้งหนี้")}</option><option value="receipt">{t("Receipt","ใบเสร็จรับเงิน")}</option></select></label>
+          <button type="button" className="button secondary" onClick={()=>{setNumber(suggestNumber(kind,date));runner.reset();}}>{t("Use next document number","ใช้เลขเอกสารถัดไป")}</button>
+          {sourceNumber && <p>{t("Based on", "อ้างอิง")}: {sourceNumber}</p>}
+          {kind === "receipt" && <label><input type="checkbox" checked={paidConfirmed} onChange={e=>setPaidConfirmed(e.target.checked)} /> {t("I verified that payment has been received. This is a manual record, not bank verification.","ฉันตรวจสอบว่าได้รับเงินแล้ว เป็นการบันทึกด้วยตนเอง ไม่ใช่การยืนยันจากธนาคาร")}</label>}
+
           <div className="settings-history">
             <button
               className="button secondary"
               type="button"
               onClick={() => {
                 const ok = saveLocal("invoice-draft", {
+                  kind, sourceNumber, paidConfirmed, promptPayPhone, promptPayConfirmed,
                   seller,
                   customer,
                   number,
@@ -109,6 +121,7 @@ export default function InvoiceTool() {
                   );
                   return;
                 }
+                loadDocument(v);
                 setSeller(v.seller);
                 setCustomer(v.customer);
                 setNumber(v.number);
@@ -337,6 +350,8 @@ export default function InvoiceTool() {
             <input maxLength={100} value={watermark} placeholder={t("COPY / For this customer only", "สำเนา / ใช้สำหรับลูกค้ารายนี้เท่านั้น")} onChange={(event) => setWatermark(event.target.value)} />
           </label>
           <p className="field-hint">{t("A faint diagonal watermark appears on every PDF page. Leave empty to omit. It identifies the document but does not encrypt it or prevent editing.", "ลายน้ำพาดเฉียงจาง 18% ทุกหน้า PDF เว้นว่างเพื่อไม่ใส่ลายน้ำ ช่วยระบุการใช้งานเอกสาร แต่ไม่ใช่การเข้ารหัสหรือป้องกันการแก้ไข")}</p>
+          <label className="field">{t("PromptPay phone (optional, THB only)","เบอร์พร้อมเพย์ (ไม่บังคับ เฉพาะ THB)")}<input inputMode="tel" maxLength={20} value={promptPayPhone} onChange={e=>{setPromptPayPhone(e.target.value);setPromptPayConfirmed(false);}} /></label>
+          {promptPayPhone && <label><input type="checkbox" checked={promptPayConfirmed} onChange={e=>setPromptPayConfirmed(e.target.checked)} /> {t("I verified this registered PromptPay number. The payer must check the recipient name and amount in their banking app.","ฉันตรวจสอบเบอร์ที่ลงทะเบียนพร้อมเพย์แล้ว ผู้จ่ายต้องตรวจชื่อผู้รับและยอดในแอปธนาคารก่อนโอน")}</label>}
           <div className="invoice-total" aria-live="polite">
             <span>{t("Total including tax", "รวมสุทธิหลังภาษี")}</span>
             <strong>
@@ -350,16 +365,17 @@ export default function InvoiceTool() {
           </div>
           <p className="field-hint">
             {t(
-              "Downloads an A4 PDF directly, without a print dialog. Text is rendered as high-resolution images to preserve Thai appearance. This is not a certified tax invoice; invoice data is stored only when you choose Save draft. It remains on this device until you delete it.",
-              "ดาวน์โหลดใบแจ้งหนี้ PDF ขนาด A4 โดยตรง ไม่ต้องสั่งพิมพ์ ข้อความเป็นภาพความละเอียดสูงเพื่อรักษารูปแบบภาษาไทย เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง ข้อมูลจะบันทึกบนอุปกรณ์เฉพาะเมื่อกดบันทึกแบบร่าง และคงอยู่จนกว่าจะลบ",
+              "Preview before downloading, or create and download an A4 PDF directly. Created documents are saved in local history. Text is rendered as high-resolution images to preserve Thai appearance. This is not a certified tax invoice; document data is stored when you create a document or save a draft. It remains on this device until you delete it.",
+              "พรีวิวก่อนดาวน์โหลด หรือสร้าง PDF ขนาด A4 โดยตรง เอกสารที่สร้างจะเก็บในประวัติบนเครื่อง ข้อความเป็นภาพความละเอียดสูงเพื่อรักษารูปแบบภาษาไทย เอกสารนี้ไม่ใช่ใบกำกับภาษีที่ได้รับการรับรอง ข้อมูลจะบันทึกบนอุปกรณ์เฉพาะเมื่อกดบันทึกแบบร่าง และคงอยู่จนกว่าจะลบ",
             )}
           </p>
-          <button className="button" type="submit">
-            {t("Create invoice", "สร้างใบแจ้งหนี้")}
+          <button className="button secondary" type="submit" value="preview">{t("Preview document", "พรีวิวก่อนดาวน์โหลด")}</button>
+          <button className="button" type="submit" value="download">
+            {kind === "invoice" ? t("Create invoice", "สร้างใบแจ้งหนี้") : kind === "quotation" ? t("Create quotation", "สร้างใบเสนอราคา") : t("Create receipt", "สร้างใบเสร็จ")}
           </button>
         </fieldset>
       </form>
-      <ResultPanel runner={runner} />
+      <ResultPanel runner={runner} hideDownload={previewOnly} />
     </>
   );
 }

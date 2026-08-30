@@ -177,8 +177,8 @@ export default function ToolsApp() {
             </strong>
             <p>
               {text(
-                "Tools process files in this browser. No file uploads to a server.",
-                "ประมวลผลในเบราว์เซอร์ ไม่อัปโหลดไฟล์ไปยังเซิร์ฟเวอร์",
+                "Most tools run locally. Nexus media sharing uploads selected files.",
+                "เครื่องมือทั่วไปทำงานในเบราว์เซอร์ ส่วนแชร์สื่อ Nexus จะอัปโหลดไฟล์",
               )}
             </p>
           </div>
@@ -470,8 +470,8 @@ export default function ToolsApp() {
                     "ไฟล์ของฉันถูกส่งไปที่ไหน?",
                   ),
                   text(
-                    "Processing runs in this browser. Files are not sent to a processing server. Closing a tool clears its inputs, except invoice drafts and settings you explicitly save on this device. Delete saved drafts/settings using the tool controls. Downloaded files remain on your device.",
-                    "ประมวลผลในเบราว์เซอร์ ไม่ส่งไฟล์ไปประมวลผลที่เซิร์ฟเวอร์ ปิดเครื่องมือจะล้างข้อมูล ยกเว้นแบบร่างและการตั้งค่าที่คุณเลือกบันทึกบนอุปกรณ์ ซึ่งลบได้จากปุ่มในเครื่องมือ ส่วนไฟล์ดาวน์โหลดจะยังอยู่",
+                    "Most processing runs in this browser. Nexus media uploads are stored on Vercel and accessible to anyone with their sharing link. Administrators can delete them in the QR tool. Closing a tool clears its inputs, except document history, contacts, invoice drafts and settings you explicitly save on this device. Delete saved drafts/settings using the tool controls. Downloaded files remain on your device.",
+                    "เครื่องมือทั่วไปประมวลผลในเบราว์เซอร์ ส่วนอัปโหลดสื่อ Nexus จะเก็บไฟล์บน Vercel ผู้มีลิงก์ดูได้ ผู้ดูแลลบได้ในเครื่องมือ QR ปิดเครื่องมือจะล้างข้อมูล ยกเว้นประวัติเอกสาร สมุดข้อมูล แบบร่างและการตั้งค่าที่คุณเลือกบันทึกบนอุปกรณ์ ซึ่งลบได้จากปุ่มในเครื่องมือ ส่วนไฟล์ดาวน์โหลดจะยังอยู่",
                   ),
                 ],
                 [

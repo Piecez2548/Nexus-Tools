@@ -1,11 +1,14 @@
+import { lazy, Suspense } from "react";
+const PdfPreview = lazy(() => import("./PdfPreview"));
 import { Check, Download, LoaderCircle, X } from "lucide-react";
 import { useLanguageStore } from "@/shared/languageStore";
 import { formatBytes } from "../services/files";
 import { messages } from "../services/errors";
 import type { useToolRunner } from "../hooks/useToolRunner";
 export default function ResultPanel({
-  runner,
+  runner, hideDownload = false,
 }: {
+  hideDownload?: boolean;
   runner: ReturnType<typeof useToolRunner>;
 }) {
   const { language } = useLanguageStore();
@@ -57,10 +60,12 @@ export default function ResultPanel({
               alt={t("Generated image preview", "ภาพตัวอย่างผลลัพธ์")}
             />
           )}
-          <a className="button" href={result.url} download={result.filename}>
+          {result.blob.type === "application/pdf" && <Suspense fallback={<p>PDF…</p>}><PdfPreview blob={result.blob} /></Suspense>}
+          {!hideDownload && <a className="button" href={result.url} download={result.filename}>
             <Download size={17} />
             {t("Download", "ดาวน์โหลด")} {result.filename}
-          </a>
+          </a>}
+          {hideDownload && <p>{t("Preview only. Use Create to save the document and download the PDF.", "นี่คือพรีวิว กดสร้างเอกสารเพื่อบันทึกประวัติและดาวน์โหลด PDF")}</p>}
           {result.blob.type.startsWith("text/html") && (
             <p>
               {t(

@@ -46,7 +46,9 @@ export function readDraft(): Invoice | null {
     return null;
   return {
     ...v,
-    ...Object.fromEntries(["title", "payment", "notes", "approver", "recipient"].map((key) => { const value = v[key as keyof Invoice]; return [key, typeof value === "string" && value.length <= 1000 ? value : ""]; })),
+    ...Object.fromEntries(["title", "payment", "notes", "approver", "recipient", "sourceNumber", "promptPayPhone"].map((key) => { const value = v[key as keyof Invoice]; return [key, typeof value === "string" && value.length <= 1000 ? value : ""]; })),
+    kind: v.kind && ["quotation","invoice","receipt"].includes(v.kind) ? v.kind : "invoice",
+    paidConfirmed: false, promptPayConfirmed: false,
     watermark: typeof v.watermark === "string" && v.watermark.length <= 100 ? v.watermark : "",
     logo:
       typeof v.logo === "string" &&

@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-08-30
 
-Nexus Tools is a standalone, client-only website with 17 tool entries. Its design uses a charcoal background, colorful category tiles and four-column tool cards. It includes Thai/English, light/dark themes, search, filtering, favorites and recently used tools.
+Nexus Tools is a standalone website with browser-based tools and a private media-sharing API with 17 tool entries. Its design uses a charcoal background, colorful category tiles and four-column tool cards. It includes Thai/English, light/dark themes, search, filtering, favorites and recently used tools.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ Nexus Tools is a standalone, client-only website with 17 tool entries. Its desig
 - Components collect input and display results. `services/` owns conversion, validation, invoice calculations and export. `hooks/useToolRunner.ts` owns cancellation, errors and download URL cleanup.
 - Merge/split PDF work runs in a dedicated Web Worker with a two-minute timeout. PDF.js previews use its own worker; page edits and image exports run in the browser. Tesseract OCR has a three-minute timeout and cancellation support, including initialization.
 - Shared language, modal accessibility and download helpers live in `src/shared/` so the project has no runtime dependency on the Nexus application.
-- The Tools entry does not initialize Nexus's database, authentication, sync, monitoring or PWA service worker. Files are never uploaded. Preferences and recent tool IDs are device-local. Invoice contents and logo persist only on explicit Save draft, with load/delete controls. Image/text setting snapshots also require explicit save (latest five per tool).
+- The Tools entry does not initialize Nexus's database, authentication, sync, monitoring or PWA service worker. Only explicit Nexus media sharing uploads files to a private Vercel Blob store. Preferences and recent tool IDs are device-local. Documents persist when created; drafts and contact/product data require explicit save, with local deletion controls. Image/text setting snapshots also require explicit save (latest five per tool).
 
 ## Implemented tools and limits
 
@@ -52,7 +52,7 @@ npm run lint
 
 The development URL is `http://127.0.0.1:5174/`. E2E tests use the compiled site on port 4174; rebuild before running them.
 
-Validation includes 27 unit/hook checks and 16 Chromium E2E workflows: PDF/image/ZIP/QR/text/invoice exports, draft persistence, input recovery, OCR cancellation, same-origin OCR assets, favorites/recent tools, keyboard focus and mobile file drops. Run `npm audit` to check current dependency advisories.
+Validation includes 34 unit/hook/API checks and 17 Chromium E2E workflows: PDF/image/ZIP/QR/text/invoice exports, draft persistence, input recovery, OCR cancellation, same-origin OCR assets, favorites/recent tools, keyboard focus and mobile file drops. Run `npm audit` to check current dependency advisories.
 
 ## Vercel deployment
 
@@ -103,3 +103,21 @@ OCR now prepares images/PDF pages with bounded upscaling, grayscale and automati
 Invoices support an optional 100-character diagonal watermark at 18% opacity on every PDF page. It is saved with explicit local drafts; older drafts default to no watermark. This is a visual identifier, not encryption or tamper protection.
 
 Invoice PDFs use yellow top/bottom accents, a left logo, bilingual right title, seller/customer columns, and a gray table header. Optional project/package, payment details, notes and signatory names persist in drafts. Blank signature/date lines are provided; no sample signature or payment account is inserted. Quantity, unit price and tax calculations are unchanged.
+
+
+## Business documents and media sharing
+
+- PDF results include paginated previews. Previewing a business document does not issue or save it; Create saves history then downloads the PDF.
+- One form produces quotations, invoices and receipts, with reference numbers for copies/conversions, watermark, seller/customer, logo, items, notes and payment/signature sections. A receipt requires manual confirmation of received payment; there is no bank integration or electronic tax-invoice certification.
+- Local document book: 100 immutable records, 100 customers and 200 products. Generated numbers use type/year plus a monotonically increasing local counter. Creating different content with the same number is rejected. Multi-device numbering/sync is not implemented. Web Locks serialize creation across supported same-origin browser tabs. Export JSON backup before clearing browser data; backup import is not implemented.
+- PromptPay QR supports registered Thai mobile numbers and fixed THB totals only. Confirm the registered number, and verify recipient name/amount in the banking app. No bank account lookup, settlement or payment-status verification. QR quiet zone remains white over document watermarks. Payload follows the [Bank of Thailand Thai QR standard](https://www.bot.or.th/content/dam/bot/documents/th/our-roles/payment-systems/about-payment-systems/ThaiQRCode_Payment_Standard.pdf).
+- OCR has side-by-side source image/PDF and an editable text area, corrected-text download and raw-text restore. OCR is fallible; this is manual correction, not guaranteed AI correction.
+- Media sharing: QR Image/Video includes an explicit upload panel. Supports JPEG/PNG/WebP and MP4/WebM, 50 MB each. Client uploads bypass function request-body limits. Files are stored on Vercel, not on the viewer device. No HTML/SVG allowed.
+- `api/upload.ts` issues short-lived, path/type/size-scoped upload tokens only after administrator authorization. `api/manage-media.ts` lists/deletes files with the same key. `api/media.ts` streams private blobs without caching and supports video range requests. `server/mediaPolicy.ts` validates paths/authentication. API errors do not return credentials.
+- Sharing URLs contain cryptographically random 256-bit file IDs. **Anyone with a sharing URL/QR can view it**; this is bearer-link access, not named-user authentication. Files persist until administrator deletion, no automatic expiry. Deleting stops future requests, but cannot revoke downloaded copies or an already-open stream. Avoid confidential uploads. Storage/bandwidth are subject to Vercel plan quotas; no paid plan upgrade was made.
+
+### Media administrator setup
+
+The production project uses private store `nexus-tools-media` in `sin1`, with server-only `BLOB_READ_WRITE_TOKEN` and `MEDIA_ADMIN_KEY`. Never prefix them with `VITE_` or commit them. On the setup machine the generated admin key is in ignored `.media-admin-key`; use it in the QR media panel and keep it private. It is held in component memory only, cleared on closing the tool or using Clear key. Rotate `MEDIA_ADMIN_KEY` in Vercel and redeploy if exposed; already-issued upload tokens expire after five minutes.
+
+`npm run dev`/preview serve browser features only. API integration requires Vercel deployment or `vercel dev` with appropriate development credentials. Production media smoke checks must use a disposable fixture and delete it afterwards. Ordinary CI does not receive media administrator credentials.

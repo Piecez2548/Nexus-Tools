@@ -86,8 +86,8 @@ export default function ToolWorkspace({
         <div className="workspace-privacy">
           <ShieldCheck size={15} />
           {language === "th"
-            ? "ประมวลผลในเบราว์เซอร์ของคุณ • ไม่มีการอัปโหลดไฟล์"
-            : "Processed in your browser • No file uploads"}
+            ? "ประมวลผลในเบราว์เซอร์ • เฉพาะการแชร์สื่อ Nexus จะอัปโหลดไฟล์"
+            : "Processed in your browser • Nexus media sharing uploads files"}
         </div>
       </section>
     </div>
