@@ -1,0 +1,86 @@
+name: CI and production deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexus-tools-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Build, lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Save failed browser test traces
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: local-e2e-failure
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  deploy:
+    name: Deploy production
+    needs: validate
+    if: vars.PRODUCTION_DEPLOY_ENABLED == 'true' && github.repository == 'Piecez2548/Nexus-Tools' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://nexus-tools-chi.vercel.app
+    env:
+      VERCEL_ORG_ID: team_aRNiUgIWA4OLZsYT72ZtIG7e
+      VERCEL_PROJECT_ID: prj_bTrQ2QqhCPQ1yGxw99tKFkJkyaat
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Build and deploy the validated commit
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          test -n "$VERCEL_TOKEN" || { echo 'VERCEL_TOKEN secret is missing'; exit 1; }
+          npx --yes vercel@59.10.0 pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx --yes vercel@59.10.0 build --prod --token="$VERCEL_TOKEN"
+          npx --yes vercel@59.10.0 deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
+      - run: npx playwright install --with-deps chromium
+      - name: Check production workflows
+        env:
+          TOOLS_BASE_URL: https://nexus-tools-chi.vercel.app
+        run: npm run test:e2e
+      - name: Save failed production test traces
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-e2e-failure
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore

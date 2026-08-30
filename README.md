@@ -57,5 +57,17 @@ The local project link is stored in ignored `.vercel/project.json`. To set up a 
 npm run deploy
 ```
 
-The script validates the linked Vercel project name and deploys this project to production. Git-based automatic deployment and future integration into the main Nexus navigation are **Planned**.
+The script validates the linked Vercel project name and deploys this project to production. This manual command bypasses CI; prefer the GitHub workflow for normal releases.
+
+## GitHub and automated deployment
+
+Repository: `Piecez2548/Nexus-Tools` (private).
+
+`.github/workflows/ci.yml` checks pull requests and pushes to `main` with Node.js 22, `npm ci`, ESLint, TypeScript/production build, unit tests and Chromium E2E tests. Actions are pinned to commit hashes and receive read-only repository access.
+
+Only a successful validation on `main` can start the production job, and the repository variable `PRODUCTION_DEPLOY_ENABLED` must be `true`. Keep this switch disabled until the token is configured. That job builds the same checked-out commit using Vercel CLI 59.10.0, deploys the prebuilt output to the existing Nexus Tools project, and runs the seven E2E workflows against production. Pull requests never receive the deployment token. Deployments on the same branch are serialized. Failed browser traces are retained for seven days.
+
+The repository secret `VERCEL_TOKEN` must contain a token scoped to project `prj_bTrQ2QqhCPQ1yGxw99tKFkJkyaat`. Never commit it or paste it into logs. Vercel Git auto-deployment is not used; GitHub Actions owns deployment so failed validation cannot trigger a release. Rotate the token before its expiry and replace the GitHub secret.
+
+Production test failure marks the workflow failed but does not automatically roll back a completed deployment. Review the traces and restore a known-good Vercel deployment when needed. Branch protection and future integration into the main Nexus navigation remain **Planned**.
 
