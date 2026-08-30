@@ -14,6 +14,7 @@ export default function InvoiceTool() {
   const runner = useToolRunner();
   const logoController = useRef<AbortController | null>(null);
   useEffect(() => () => logoController.current?.abort(), []);
+  const [details, setDetails] = useState({ title: "", payment: "", notes: "", approver: "", recipient: "" });
   const [watermark, setWatermark] = useState("");
   const [logoBusy, setLogoBusy] = useState(false);
   const [logo, setLogo] = useState(""),
@@ -51,6 +52,7 @@ export default function InvoiceTool() {
             const result = await createInvoicePdf({
               logo,
               watermark,
+              ...details,
               seller,
               customer,
               number,
@@ -82,6 +84,7 @@ export default function InvoiceTool() {
                   language,
                   logo,
               watermark,
+              ...details,
                 });
                 setDraftMessage(
                   ok
@@ -115,6 +118,7 @@ export default function InvoiceTool() {
                 setItems(v.items);
                 setLogo(v.logo ?? "");
                 setWatermark(v.watermark ?? "");
+                setDetails({ title: v.title ?? "", payment: v.payment ?? "", notes: v.notes ?? "", approver: v.approver ?? "", recipient: v.recipient ?? "" });
                 runner.reset();
                 setDraftMessage(t("Draft restored.", "เรียกคืนแบบร่างแล้ว"));
               }}
@@ -326,6 +330,8 @@ export default function InvoiceTool() {
               />
             </label>
           </div>
+          <p className="field-hint">{t("Seller/customer fields accept multiple lines: name, tax ID, phone and address. Signature lines are left blank for actual signing.", "ช่องผู้ขาย/ลูกค้าใส่ได้หลายบรรทัด เช่น ชื่อ เลขผู้เสียภาษี โทรศัพท์ และที่อยู่ ช่องลายเซ็นใน PDF เว้นไว้สำหรับลงนามจริง")}</p>
+          {([ ["title", "Project / package", "ชื่อโครงการ / แพ็กเกจ"], ["payment", "Payment details", "ช่องทางการชำระเงิน"], ["notes", "Notes", "หมายเหตุ"], ["approver", "Approver name", "ชื่อผู้อนุมัติ"], ["recipient", "Recipient name", "ชื่อผู้รับใบแจ้งหนี้"] ] as const).map(([key, en, thLabel]) => <label className="field" key={key}>{t(en, thLabel)}<textarea rows={key === "payment" || key === "notes" ? 3 : 1} maxLength={1000} value={details[key]} onChange={(e) => setDetails({ ...details, [key]: e.target.value })} /></label>)}
           <label className="field">
             {t("Invoice watermark (optional)", "ลายน้ำใบแจ้งหนี้ (ไม่บังคับ)")}
             <input maxLength={100} value={watermark} placeholder={t("COPY / For this customer only", "สำเนา / ใช้สำหรับลูกค้ารายนี้เท่านั้น")} onChange={(event) => setWatermark(event.target.value)} />

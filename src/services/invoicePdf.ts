@@ -41,6 +41,7 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
   };
   const start = () => {
     ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffe15b"; ctx.fillRect(0, 0, canvas.width, 32); ctx.fillRect(0, canvas.height - 32, canvas.width, 32);
     y = 100; pageNumber++;
   };
   const save = async () => {
@@ -60,12 +61,13 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
   };
   const rule = () => { ctx.fillStyle = "#ccd5c7"; ctx.fillRect(left, y, right - left, 2); y += 22; };
   const tableHeader = async () => {
-    await ensure(50);
+    await ensure(90);
+    ctx.fillStyle = "#efefef"; ctx.fillRect(left - 12, y - 15, right - left + 24, 65);
     text(t("Description", "รายการ"), left, y, true);
     text(t("Qty", "จำนวน"), 730, y, true, 21, "right");
     text(t("Price", "ราคา"), 930, y, true, 21, "right");
     text(t("Amount", "จำนวนเงิน"), right, y, true, 21, "right");
-    y += 42;
+    y += 76;
   };
   start();
   if (invoice.logo) {
@@ -74,19 +76,31 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
     try {
       const scale = Math.min(220 / bitmap.width, 120 / bitmap.height);
       ctx.drawImage(bitmap, left, y, bitmap.width * scale, bitmap.height * scale);
-      y += bitmap.height * scale + 25;
+
     } finally { bitmap.close(); }
   }
-  await block(t("INVOICE", "ใบแจ้งหนี้"), true, 42);
-  await block(invoice.number, true);
-  await block(invoice.date);
-  y += 12;
-  await block(t("Seller / business", "ผู้ขาย / ธุรกิจ"), true);
-  await block(invoice.seller);
-  y += 16; await ensure(22); rule();
-  await block(t("Bill to", "ลูกค้า"), true);
-  await block(invoice.customer);
+  if (!invoice.logo) text("NEXUS", left, 110, true, 40);
+  text("ใบแจ้งหนี้", right, 80, true, 66, "right");
+  text("Invoice", right, 175, true, 46, "right");
+  y = 280;
+  // Wrap reference and date safely, including unusually long invoice numbers.
+  await block(`${t("Invoice no.", "เลขที่")} ${invoice.number}   |   ${invoice.date}`, false, 20);
   y += 24;
+  const columns = async (a: string[], b: string[]) => {
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      await ensure(38);
+      if (a[i]) text(a[i], left, y);
+      if (b[i]) text(b[i], 680, y);
+      y += 38;
+    }
+  };
+  await ensure(80);
+  text(t("Seller", "ผู้ขาย"), left, y, true, 26);
+  text(t("Customer", "ลูกค้า"), 680, y, true, 26);
+  y += 44;
+  await columns(wrap(invoice.seller, 490), wrap(invoice.customer, 480));
+  y += 32;
+  if (invoice.title?.trim()) { await block(invoice.title, true, 32); y += 25; }
   await tableHeader();
   for (const [index, item] of invoice.items.entries()) {
     const lines = wrap(item.description, 540);
@@ -104,7 +118,8 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
     }
     y += 6; rule();
   }
-  await ensure(180);
+  await ensure(200);
+  ctx.fillStyle = "#202a25"; ctx.fillRect(left, y, right - left, 4); y += 20;
   for (const [label, value] of [
     [t("Subtotal", "รวมก่อนภาษี"), totals.subtotal],
     [`${t("Tax", "ภาษี")} (${Number(invoice.tax)}%)`, totals.tax],
@@ -112,6 +127,16 @@ export async function createInvoicePdf(invoice: Invoice, signal: AbortSignal): P
   ] as const) {
     text(label, left, y, true); text(money(value), right, y, true, 24, "right"); y += 52;
   }
+  y += 50;
+  const signatureLines = [
+    t("Approved by", "ผู้อนุมัติ"), "", "____________________________", ...wrap(invoice.approver ?? "", 490),
+    t("Date ______________________", "วันที่ ______________________"), "", "",
+    t("Received by", "ผู้รับใบแจ้งหนี้"), "", "____________________________", ...wrap(invoice.recipient ?? "", 490),
+    t("Date ______________________", "วันที่ ______________________"),
+  ];
+  const paymentLines = [t("Payment details", "ช่องทางการชำระเงิน"), ...wrap(invoice.payment || "-", 480), "", "", t("Notes", "หมายเหตุ"), ...wrap(invoice.notes || "-", 480)];
+  await ensure(Math.min(bottom - 100, Math.max(signatureLines.length, paymentLines.length) * 38));
+  await columns(signatureLines, paymentLines);
   await save();
   abortCheck(signal);
   return { blob: new Blob([new Uint8Array(await pdf.save())], { type: "application/pdf" }), filename: `invoice-${invoice.number.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 60)}.pdf`, pages: pdf.getPageCount() };

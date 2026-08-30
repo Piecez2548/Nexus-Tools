@@ -257,6 +257,8 @@ test("invoice draft with logo persists only on explicit save and can be deleted"
     ),
   ).toBeNull();
   await page.getByLabel("Invoice watermark (optional)").fill("CONFIDENTIAL");
+  await page.getByLabel("Project / package").fill("Starter package");
+  await page.getByLabel("Payment details").fill("Bank transfer - details provided separately");
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
   await page.reload();
   await open(page, "Invoice Generator");
@@ -265,6 +267,8 @@ test("invoice draft with logo persists only on explicit save and can be deleted"
     "Draft business",
   );
   await expect(page.getByLabel("Invoice watermark (optional)")).toHaveValue("CONFIDENTIAL");
+  await expect(page.getByLabel("Project / package")).toHaveValue("Starter package");
+  await expect(page.getByLabel("Payment details")).toHaveValue("Bank transfer - details provided separately");
   await page
     .getByRole("button", { name: "Create invoice", exact: true })
     .click();

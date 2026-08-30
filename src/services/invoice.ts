@@ -4,6 +4,11 @@ import type { ToolResult } from "./files";
 export interface Invoice {
   logo?: string;
   watermark?: string;
+  title?: string;
+  payment?: string;
+  notes?: string;
+  approver?: string;
+  recipient?: string;
   seller: string;
   customer: string;
   number: string;
@@ -31,6 +36,10 @@ export function validateInvoice(invoice: Invoice) {
   )
     throw new ToolError("invoice");
   if (invoice.watermark !== undefined && (typeof invoice.watermark !== "string" || invoice.watermark.length > 100)) throw new ToolError("invoice");
+  for (const key of ["title", "payment", "notes", "approver", "recipient"] as const) {
+    const value = invoice[key];
+    if (value !== undefined && (typeof value !== "string" || value.length > 1000)) throw new ToolError("invoice");
+  }
   const parsed = new Date(`${invoice.date}T12:00:00Z`);
   if (
     !Number.isFinite(parsed.getTime()) ||

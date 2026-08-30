@@ -46,6 +46,7 @@ export function readDraft(): Invoice | null {
     return null;
   return {
     ...v,
+    ...Object.fromEntries(["title", "payment", "notes", "approver", "recipient"].map((key) => { const value = v[key as keyof Invoice]; return [key, typeof value === "string" && value.length <= 1000 ? value : ""]; })),
     watermark: typeof v.watermark === "string" && v.watermark.length <= 100 ? v.watermark : "",
     logo:
       typeof v.logo === "string" &&

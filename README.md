@@ -101,3 +101,5 @@ Media QR modes encode HTTPS sharing links, not uploaded files. Host the media se
 OCR now prepares images/PDF pages with bounded upscaling, grayscale and automatic dark-background inversion. Users may override the background or crop a percentage region (applied to every PDF page). Optional Thai spacing cleanup preserves raw OCR and offers a separate download; it can remove intentional spaces and does not fix recognition errors. Small Thai text, names, digits, watermarks and clipped screenshots still require proofreading.
 
 Invoices support an optional 100-character diagonal watermark at 18% opacity on every PDF page. It is saved with explicit local drafts; older drafts default to no watermark. This is a visual identifier, not encryption or tamper protection.
+
+Invoice PDFs use yellow top/bottom accents, a left logo, bilingual right title, seller/customer columns, and a gray table header. Optional project/package, payment details, notes and signatory names persist in drafts. Blank signature/date lines are provided; no sample signature or payment account is inserted. Quantity, unit price and tax calculations are unchanged.
