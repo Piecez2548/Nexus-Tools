@@ -53,6 +53,10 @@ export default function ResultPanel({
                 : ""}
             </p>
           )}
+          {!hideDownload && <a className="button" href={result.url} download={result.filename}>
+            <Download size={17} />
+            {t("Download", "ดาวน์โหลด")} {result.filename}
+          </a>}
           {result.blob.type.startsWith("image/") && (
             <img
               className="result-image"
@@ -61,10 +65,7 @@ export default function ResultPanel({
             />
           )}
           {result.blob.type === "application/pdf" && <Suspense fallback={<p>PDF…</p>}><PdfPreview blob={result.blob} /></Suspense>}
-          {!hideDownload && <a className="button" href={result.url} download={result.filename}>
-            <Download size={17} />
-            {t("Download", "ดาวน์โหลด")} {result.filename}
-          </a>}
+
           {hideDownload && <p>{t("Preview only. Use Create to save the document and download the PDF.", "นี่คือพรีวิว กดสร้างเอกสารเพื่อบันทึกประวัติและดาวน์โหลด PDF")}</p>}
           {result.blob.type.startsWith("text/html") && (
             <p>

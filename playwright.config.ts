@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   timeout: 45_000,
+  // Remote deployments may need to fetch a cold PDF/OCR chunk before showing results.
+  expect: { timeout: 15_000 },
   fullyParallel: true,
   workers: 2,
   reporter: "list",
