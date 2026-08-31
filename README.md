@@ -151,6 +151,8 @@ npm run dev
 
 เปิด `http://127.0.0.1:5174/` สำหรับพัฒนา ถ้ามีโฟลเดอร์เดิมแล้ว ให้เข้าโฟลเดอร์นั้นและเริ่มจาก `npm ci` ไม่ต้อง clone ซ้ำ
 
+`npm run dev` และ `npm run preview` ให้บริการ frontend เท่านั้น การอัปโหลดสื่อ ซิงก์ และจองเลขบนคลาวด์ต้องใช้ Vercel deployment หรือ `vercel dev` พร้อม environment ที่ตั้งค่าแล้ว
+
 ```powershell
 npm run build
 npm run preview
@@ -188,7 +190,7 @@ Store ที่ตั้งค่าไว้สำหรับโปรเจ�
 npm run lint
 npm run build
 npm test
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm run test:e2e
 ```
 

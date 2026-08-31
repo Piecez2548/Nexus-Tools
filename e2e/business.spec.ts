@@ -3,6 +3,9 @@ import { readFile } from "node:fs/promises";
 import jsQR from "jsqr";
 const decodeQR = jsQR as unknown as (data:Uint8ClampedArray,w:number,h:number)=>{data:string}|null;
 test("preview, contacts, quotation-to-invoice-to-receipt and readable PromptPay QR",async({page},info)=>{
+  // Four PDF renders plus QR pixel decoding take longer on Linux WebKit CI.
+  // Keep every output assertion; allow the entire multi-document workflow to finish.
+  test.setTimeout(120_000);
   await page.addInitScript(()=>localStorage.setItem("nexus-language",JSON.stringify({state:{language:"en"},version:0})));
   await page.goto("/");
   await page.getByRole("button",{name:"Open Invoice Generator",exact:true}).click();
