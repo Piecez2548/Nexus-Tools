@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./auth-fixture.js";
 import { PDFDocument } from "pdf-lib";
 import { toBuffer } from "qrcode";
 import { readFile } from "node:fs/promises";

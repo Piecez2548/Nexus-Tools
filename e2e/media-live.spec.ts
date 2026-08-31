@@ -1,4 +1,4 @@
-import {test,expect} from "@playwright/test";
+import {test,expect} from "./auth-fixture.js";
 import {toBuffer} from "qrcode";
 test.use({trace:"off"});
 test("live private media upload, sharing, range and revocation",async({page,request})=>{

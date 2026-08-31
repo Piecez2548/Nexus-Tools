@@ -1,0 +1,38 @@
+import { afterEach, expect, test, vi } from "vitest";
+const { setSession } = vi.hoisted(() => ({ setSession: vi.fn().mockResolvedValue({ error: null }) }));
+vi.mock("../services/account", () => ({ accountClient: { auth: { setSession } } }));
+import { nexusOrigin, receiveNexusSession } from "../services/sso";
+afterEach(() => { vi.useRealTimers(); vi.clearAllMocks(); window.opener = null; history.replaceState(null, "", "/"); });
+test("SSO rejects wrong origin, source and nonce; consumes a valid response once", async () => {
+  vi.useFakeTimers();
+  const opener = { postMessage: vi.fn() };
+  window.opener = opener;
+  const nonce = "a".repeat(64);
+  history.replaceState(null, "", `/?nexus_sso=${nonce}`);
+  const pending = receiveNexusSession();
+  const data = { type: "nexus:session", nonce, access_token: "access", refresh_token: "refresh" };
+  const send = (origin: string, source: unknown, payload = data) => window.dispatchEvent(new MessageEvent("message", { origin, source: source as Window, data: payload }));
+  send("https://attacker.example", opener);
+  send(nexusOrigin, window);
+  send(nexusOrigin, opener, { ...data, nonce: "wrong" });
+  expect(setSession).not.toHaveBeenCalled();
+  send(nexusOrigin, opener);
+  send(nexusOrigin, opener);
+  await pending;
+  expect(setSession).toHaveBeenCalledTimes(1);
+  expect(location.search).toBe("");
+  expect(window.opener).toBeNull();
+});
+test("SSO timeout returns to normal authentication and removes the listener", async () => {
+  vi.useFakeTimers();
+  const opener = { postMessage: vi.fn() };
+  window.opener = opener;
+  const nonce = "b".repeat(64);
+  history.replaceState(null, "", `/?nexus_sso=${nonce}`);
+  const pending = receiveNexusSession();
+  await vi.advanceTimersByTimeAsync(15_000);
+  await pending;
+  window.dispatchEvent(new MessageEvent("message", { origin: nexusOrigin, source: opener as unknown as Window, data: { type: "nexus:session", nonce, access_token: "a", refresh_token: "b" } }));
+  expect(setSession).not.toHaveBeenCalled();
+  expect(window.opener).toBeNull();
+});

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./auth-fixture.js";
 import { readFile } from "node:fs/promises";
 import jsQR from "jsqr";
 const decodeQR = jsQR as unknown as (data:Uint8ClampedArray,w:number,h:number)=>{data:string}|null;

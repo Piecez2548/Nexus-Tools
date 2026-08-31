@@ -1354,3 +1354,16 @@ html[data-tools-theme="light"] .favorite-button.saved {
 .account-panel summary { cursor: pointer; font-weight: 600; }
 .account-panel .tool-fields { max-width: 620px; margin-top: 16px; }
 .account-panel input { max-width: 100%; }
+.auth-page { width: min(100%, 540px); margin: 0 auto; padding: clamp(24px, 6vh, 72px) 20px; }
+.auth-page header { margin-bottom: 28px; }
+.auth-page h1 { font-size: 32px; margin-bottom: 12px; }
+.auth-page h2 { font-size: 22px; }
+.auth-page p { line-height: 1.65; overflow-wrap: anywhere; }
+.auth-page .account-panel { padding: 24px; background: var(--surface); }
+.auth-page .field { font-size: 14px; }
+.auth-page .field input { font-size: 16px; }
+.auth-page .field-hint { font-size: 13px; }
+.auth-page .tool-fields > .button { align-self: stretch; justify-content: center; }
+.account-panel fieldset { min-width: 0; }
+.account-panel button { min-height: 44px; }
+.account-link { display: inline-block; margin-top: 20px; text-decoration: underline; text-underline-offset: 4px; }

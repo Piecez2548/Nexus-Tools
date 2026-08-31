@@ -2,11 +2,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import MediaViewer from "./components/MediaViewer";
 import ToolsApp from "./ToolsApp";
+import AuthGate from "./components/AuthGate";
 import "./tools.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {new URLSearchParams(location.search).has("media") ? <MediaViewer id={new URLSearchParams(location.search).get("media")!} /> : <ToolsApp />}
+    {new URLSearchParams(location.search).has("media") ? <MediaViewer id={new URLSearchParams(location.search).get("media")!} /> : <AuthGate><ToolsApp /></AuthGate>}
   </StrictMode>,
 );
 

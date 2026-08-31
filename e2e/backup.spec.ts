@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./auth-fixture.js";
 test("backup restore previews, rejects invalid data and preserves counters",async({page})=>{
   await page.addInitScript(()=>localStorage.setItem("nexus-language",JSON.stringify({state:{language:"en"},version:0})));
   await page.goto("/");
