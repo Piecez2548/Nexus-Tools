@@ -1,4 +1,4 @@
-import { ToolError } from "./errors";
+import { ToolError } from "./errors.js";
 export const unitGroups = {
   length: {
     m: 1,

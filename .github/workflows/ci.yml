@@ -31,7 +31,7 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm test
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
       - name: Save failed browser test traces
         if: failure()
@@ -69,7 +69,7 @@ jobs:
         run: |
           test -n "$VERCEL_TOKEN" || { echo 'VERCEL_TOKEN secret is missing'; exit 1; }
           npx --yes vercel@59.10.0 deploy --prod --yes --token="$VERCEL_TOKEN"
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
       - name: Check production workflows
         env:
           TOOLS_BASE_URL: https://nexus-tools-chi.vercel.app

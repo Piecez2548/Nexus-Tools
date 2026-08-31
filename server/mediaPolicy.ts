@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 export const mediaTypes: Record<string, string> = { jpg: "image/jpeg", png: "image/png", webp: "image/webp", mp4: "video/mp4", webm: "video/webm" };
-export const mediaPath = /^media\/[a-f0-9]{64}\.(jpg|png|webp|mp4|webm)$/;
+export const mediaPath = /^media\/(?:v2\/)?[a-f0-9]{64}\.(jpg|png|webp|mp4|webm)$/;
 export const maxMediaSize = 50 * 1024 * 1024;
 export function authorized(request: Request) {
   const expected = process.env.MEDIA_ADMIN_KEY;

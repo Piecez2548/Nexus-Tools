@@ -1,12 +1,15 @@
+import { accessToken } from "./account";
 export const mediaTypes: Record<string, string> = { "image/jpeg":"jpg", "image/png":"png", "image/webp":"webp", "video/mp4":"mp4", "video/webm":"webm" };
-export const mediaIdPattern = /^media\/[a-f0-9]{64}\.(jpg|png|webp|mp4|webm)$/;
+export const mediaIdPattern = /^media\/(?:v2\/)?[a-f0-9]{64}\.(jpg|png|webp|mp4|webm)$/;
 export function mediaLink(pathname: string) { const url = new URL(location.origin); url.searchParams.set("media", pathname); return url.href; }
-export async function uploadMedia(file: File, key: string, progress: (value: number) => void) {
+export async function uploadMedia(file: File, key: string, progress: (value: number) => void, policy: {access:"link"|"owner";days:number} = {access:"link",days:7}) {
   const extension = mediaTypes[file.type];
   if (!extension || file.size === 0 || file.size > 50 * 1024 * 1024) throw new Error("file");
   const id = Array.from(crypto.getRandomValues(new Uint8Array(32)), v=>v.toString(16).padStart(2,"0")).join("");
   const { upload } = await import("@vercel/blob/client");
-  const result = await upload(`media/${id}.${extension}`, file, { access:"private", handleUploadUrl:"/api/upload", headers:{Authorization:`Bearer ${key}`}, contentType:file.type, multipart:file.size > 4 * 1024 * 1024, onUploadProgress:e=>progress(Math.round(e.percentage)) });
+  const headers: Record<string,string> = {Authorization:`Bearer ${key}`};
+  if (policy.access === "owner") { headers["X-Nexus-Authorization"] = `Bearer ${await accessToken()}`; }
+  const result = await upload(`media/v2/${id}.${extension}`, file, { access:"private", handleUploadUrl:"/api/upload", headers, clientPayload:JSON.stringify(policy), contentType:file.type, multipart:file.size > 4 * 1024 * 1024, onUploadProgress:e=>progress(Math.round(e.percentage)) });
   return result.pathname;
 }
 export interface MediaEntry { pathname:string; size:number; uploadedAt:string }

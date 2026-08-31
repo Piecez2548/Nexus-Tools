@@ -1,3 +1,4 @@
+import CloudNumber from "./CloudNumber";
 import DocumentBook from "./DocumentBook";
 import { suggestNumber, storeDocument, type DocumentKind } from "../services/documentBook";
 import type { Invoice } from "../services/invoice";
@@ -22,6 +23,7 @@ export default function InvoiceTool() {
   const [paidConfirmed, setPaidConfirmed] = useState(false), [promptPayPhone, setPromptPayPhone] = useState(""), [promptPayConfirmed, setPromptPayConfirmed] = useState(false);
   const [details, setDetails] = useState({ title: "", payment: "", notes: "", approver: "", recipient: "" });
   const [watermark, setWatermark] = useState("");
+  const [cloudBusy, setCloudBusy] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
   const [logo, setLogo] = useState(""),
     [draftMessage, setDraftMessage] = useState("");
@@ -72,10 +74,11 @@ export default function InvoiceTool() {
           });
         }}
       >
-        <fieldset disabled={runner.busy || logoBusy} className="tool-fields">
+        <fieldset disabled={runner.busy || logoBusy || cloudBusy} className="tool-fields">
           <DocumentBook invoice={current} onLoad={loadDocument} />
           <label className="field">{t("Document type", "ประเภทเอกสาร")}<select value={kind} onChange={e=>{const next=e.target.value as DocumentKind; setSourceNumber(""); setKind(next); setNumber(suggestNumber(next,date)); setPaidConfirmed(false);}}><option value="quotation">{t("Quotation","ใบเสนอราคา")}</option><option value="invoice">{t("Invoice","ใบแจ้งหนี้")}</option><option value="receipt">{t("Receipt","ใบเสร็จรับเงิน")}</option></select></label>
           <button type="button" className="button secondary" onClick={()=>{setNumber(suggestNumber(kind,date));runner.reset();}}>{t("Use next document number","ใช้เลขเอกสารถัดไป")}</button>
+          <CloudNumber kind={kind} date={date} onNumber={setNumber} onBusy={setCloudBusy} th={language === "th"} />
           {sourceNumber && <p>{t("Based on", "อ้างอิง")}: {sourceNumber}</p>}
           {kind === "receipt" && <label><input type="checkbox" checked={paidConfirmed} onChange={e=>setPaidConfirmed(e.target.checked)} /> {t("I verified that payment has been received. This is a manual record, not bank verification.","ฉันตรวจสอบว่าได้รับเงินแล้ว เป็นการบันทึกด้วยตนเอง ไม่ใช่การยืนยันจากธนาคาร")}</label>}
 

@@ -1,4 +1,4 @@
-import { ToolError } from "./errors";
+import { ToolError } from "./errors.js";
 export interface ToolResult {
   blob: Blob;
   filename: string;

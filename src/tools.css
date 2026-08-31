@@ -1349,3 +1349,8 @@ html[data-tools-theme="light"] .favorite-button.saved {
 @media(max-width:700px){ .ocr-review{grid-template-columns:1fr;} }
 
 .media-viewer{max-width:1000px;margin:3rem auto;padding:24px}.media-viewer img,.media-viewer video{display:block;max-width:100%;max-height:75vh;margin:20px auto}
+
+.account-panel { margin: 0 0 24px; padding: 16px 20px; border: 1px solid var(--border); border-radius: 12px; }
+.account-panel summary { cursor: pointer; font-weight: 600; }
+.account-panel .tool-fields { max-width: 620px; margin-top: 16px; }
+.account-panel input { max-width: 100%; }

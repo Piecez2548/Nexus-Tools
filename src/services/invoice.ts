@@ -1,7 +1,7 @@
-import { promptPayPayload } from "./promptPay";
-import { invoiceTotals, type InvoiceItem } from "./calculations";
-import { ToolError } from "./errors";
-import type { ToolResult } from "./files";
+import { promptPayPayload } from "./promptPay.js";
+import { invoiceTotals, type InvoiceItem } from "./calculations.js";
+import { ToolError } from "./errors.js";
+import type { ToolResult } from "./files.js";
 export interface Invoice {
   kind?: "quotation" | "invoice" | "receipt";
   sourceNumber?: string;

@@ -1,3 +1,4 @@
+import AccountPanel from "./components/AccountPanel";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
@@ -262,6 +263,7 @@ export default function ToolsApp() {
           </div>
         </header>
         <main id="tools-main" tabIndex={-1}>
+          <AccountPanel />
           {view === "home" && !query && (
             <section className="hero">
               <div className="eyebrow">
@@ -377,7 +379,8 @@ export default function ToolsApp() {
                   >
                     <button
                       className="tool-card-main"
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.currentTarget.focus();
                         recordRecent(tool.id);
                         setActiveTool(tool);
                       }}

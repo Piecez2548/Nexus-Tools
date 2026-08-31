@@ -1,4 +1,4 @@
-import type { Invoice } from "./invoice";
+import type { Invoice } from "./invoice.js";
 const prefix = "nexus-tools-";
 export function readLocal<T>(key: string, fallback: T): T {
   try {

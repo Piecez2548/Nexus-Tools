@@ -1,5 +1,6 @@
 import { list, del } from "@vercel/blob";
 import { authorized, json, mediaPath } from "../server/mediaPolicy.js";
+import { policyPath } from "../server/mediaAccess.js";
 export async function GET(request: Request) {
   if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
   try {
@@ -13,6 +14,6 @@ export async function DELETE(request: Request) {
   if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
   const pathname = new URL(request.url).searchParams.get("id") ?? "";
   if (!mediaPath.test(pathname)) return json({ error: "Invalid file" }, 400);
-  try { await del(pathname); return json({ deleted: true }); }
+  try { await del(pathname.startsWith("media/v2/") ? [pathname, policyPath(pathname)] : pathname); return json({ deleted: true }); }
   catch { return json({ error: "Deletion failed" }, 503); }
 }

@@ -1,6 +1,6 @@
-import { validateInvoice, type Invoice } from "./invoice";
-import { readLocal, saveLocal } from "./localData";
-import { ToolError } from "./errors";
+import { validateInvoice, type Invoice } from "./invoice.js";
+import { readLocal, saveLocal } from "./localData.js";
+import { ToolError } from "./errors.js";
 export type DocumentKind = "quotation" | "invoice" | "receipt";
 export interface SavedDocument { id: string; savedAt: string; document: Invoice }
 export interface Book { documents: SavedDocument[]; customers: string[]; products: Invoice["items"]; seller: string; counters: Record<string, number> }
@@ -16,7 +16,7 @@ export function readBook(): Book {
   book.counters = Object.fromEntries(Object.entries(v.counters).filter(([k,n])=>/^(QUO|INV|REC)-\d{4}$/.test(k) && Number.isSafeInteger(n) && n>=0 && n<1000000000));
   return book;
 }
-function writeBook(book: Book) { if (!saveLocal("document-book", book)) throw new ToolError("storage"); window.dispatchEvent(new Event("nexus-book-changed")); }
+export function writeBook(book: Book) { if (!saveLocal("document-book", book)) throw new ToolError("storage"); window.dispatchEvent(new Event("nexus-book-changed")); }
 export function suggestNumber(kind: DocumentKind, date: string) {
   const year = /^\d{4}-/.test(date) ? date.slice(0,4) : String(new Date().getFullYear());
   const prefix = `${{quotation:"QUO",invoice:"INV",receipt:"REC"}[kind]}-${year}`;

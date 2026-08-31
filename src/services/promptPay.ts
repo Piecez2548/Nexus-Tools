@@ -1,4 +1,4 @@
-import { ToolError } from "./errors";
+import { ToolError } from "./errors.js";
 const field = (id: string, value: string) => id + String(value.length).padStart(2,"0") + value;
 export function crc16(value: string) {
   let crc = 0xffff;
