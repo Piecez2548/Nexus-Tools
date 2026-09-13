@@ -1,6 +1,9 @@
 import { test, expect } from "./auth-fixture.js";
 import { readFileSync } from "node:fs";
 const axe = readFileSync("node_modules/axe-core/axe.min.js", "utf8");
+// axe is test-only inline code. Keep the production CSP strict while allowing
+// Playwright's isolated audit context to inject the scanner.
+test.use({ bypassCSP: true });
 for (const theme of ["dark", "light", "mono"]) {
   test(`catalogue accessibility ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 });
