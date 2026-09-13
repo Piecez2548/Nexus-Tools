@@ -1,13 +1,34 @@
 # Nexus Tools
 
-> Performance regression checks run separately from the functional browser matrix via `npx playwright test --config=e2e/performance.config.ts` (Chromium, one worker). CI runs both groups locally and against production so CPU/network throttling does not compete with functional tests.
+[![Live Demo](https://img.shields.io/badge/demo-live-7c3aed)](https://nexus-tools-chi.vercel.app/)
+[![CI](https://github.com/Piecez2548/Nexus-Tools/actions/workflows/ci.yml/badge.svg)](https://github.com/Piecez2548/Nexus-Tools/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)](https://www.typescriptlang.org/)
 
-ศูนย์รวมเครื่องมือสำหรับ PDF รูปภาพ ข้อความ QR Code และเอกสารธุรกิจ รองรับภาษาไทยและอังกฤษ พร้อมธีมสว่าง/มืด การค้นหา หมวดหมู่ รายการโปรด และเครื่องมือที่ใช้ล่าสุด
+Production-ready bilingual web workspace for PDF, image, OCR, QR, text, and business-document workflows. It combines client-side file processing with authenticated cloud sync, protected media delivery, responsive accessibility, and automated cross-browser release checks.
 
-- **เว็บไซต์:** [nexus-tools-chi.vercel.app](https://nexus-tools-chi.vercel.app/)
-- **Repository:** [Piecez2548/Nexus-Tools](https://github.com/Piecez2548/Nexus-Tools) (Private)
+เว็บรวมเครื่องมือสำหรับ PDF รูปภาพ OCR ข้อความ QR Code และเอกสารธุรกิจ รองรับภาษาไทยและอังกฤษ พร้อมระบบบัญชี ซิงก์ข้อมูล ธีมสว่าง/มืด การค้นหา หมวดหมู่ รายการโปรด และประวัติการใช้งานล่าสุด
+
+- **Live demo:** [nexus-tools-chi.vercel.app](https://nexus-tools-chi.vercel.app/)
+- **Source code:** [github.com/Piecez2548/Nexus-Tools](https://github.com/Piecez2548/Nexus-Tools)
 - **โปรเจกต์ Vercel:** `nexus-tools` แยกจากโปรเจกต์ `nexus`
-- **อัปเดตเอกสาร:** 31 สิงหาคม 2026
+- **อัปเดตเอกสาร:** 13 กันยายน 2026
+
+## Portfolio highlights
+
+- 17 practical tools with lazy-loaded workspaces to keep the initial interface lightweight
+- Direct A4 PDF generation for quotations, invoices, and receipts with Thai text, watermarks, logos, signatures, tax, and PromptPay QR
+- Browser-local PDF/image/OCR processing with explicit limits, validation, recoverable errors, and no upload for ordinary tools
+- Supabase authentication with email verification and MFA enforcement, plus a nonce-bound cross-origin session handoff from Nexus
+- Private Vercel Blob storage for cloud books and expiring media, protected by server-side identity checks, ETag conflict control, and scoped access cookies
+- CI covering TypeScript builds, ESLint, dependency audit/SBOM, unit/API tests, accessibility, performance budgets, and Chromium/Firefox/WebKit workflows
+
+## Tech stack
+
+`React 19` · `TypeScript` · `Vite` · `Zustand` · `Supabase Auth` · `Vercel Functions/Blob` · `pdf-lib` · `PDF.js` · `Tesseract.js` · `Playwright` · `Vitest`
+
+> This repository is published for portfolio review. No open-source license is granted; all rights are reserved by the author.
+
+> Performance regression checks run separately from the functional browser matrix via `npx playwright test --config=e2e/performance.config.ts` (Chromium, one worker). CI runs both groups locally and against production so CPU/network throttling does not compete with functional tests.
 
 > เครื่องมือทั่วไปประมวลผลไฟล์ในเบราว์เซอร์ ส่วน **อัปโหลดสื่อ Nexus** และ **ซิงก์ข้อมูลธุรกิจ** จะส่งข้อมูลไป private Vercel Blob เมื่อผู้ใช้ยืนยัน เลือกสิทธิ์สื่อและวันหมดอายุก่อนแชร์ ข้อมูลคลาวด์ไม่ได้เข้ารหัสแบบ end-to-end
 
