@@ -288,8 +288,13 @@ test("OCR reads a real image using locally hosted Thai/English models", async ({
   const image = await png(page, true);
   const external: string[] = [];
   page.on("request", (r) => {
+    const requested = new URL(r.url());
+    const isAccountVerification =
+      requested.hostname.endsWith(".supabase.co") &&
+      requested.pathname === "/auth/v1/user";
     if (
-      new URL(r.url()).origin !== new URL(page.url()).origin &&
+      requested.origin !== new URL(page.url()).origin &&
+      !isAccountVerification &&
       !r.url().startsWith("blob:") &&
       !r.url().startsWith("data:")
     )
