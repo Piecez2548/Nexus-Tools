@@ -41,6 +41,7 @@ test("missing policies fail closed rather than exposing a private upload",async(
 });
 test("media access cookies are signed, owner-bound, path-bound and expiring",()=>{
   vi.stubEnv("MEDIA_ADMIN_KEY","b".repeat(64));
+  vi.stubEnv("MEDIA_COOKIE_SIGNING_KEY","c".repeat(64));
   const path=`media/v2/${"a".repeat(64)}.png`,policy={access:"owner" as const,owner:"user-a",expiresAt:Date.now()+60000};
   const cookie=accessCookie(path,policy);
   const request=new Request("https://example.com/api/media",{headers:{cookie:cookie.split(";")[0]}});
@@ -49,4 +50,9 @@ test("media access cookies are signed, owner-bound, path-bound and expiring",()=
   expect(hasAccessCookie(request,path,{...policy,owner:"user-b"})).toBe(false);
   expect(hasAccessCookie(request,path.replace(".png",".jpg"),policy)).toBe(false);
   expect(hasAccessCookie(request,path,{...policy,expiresAt:Date.now()-1})).toBe(false);
+});
+test("administrator credentials cannot be reused to forge media access cookies",()=>{
+  vi.stubEnv("MEDIA_ADMIN_KEY","b".repeat(64));
+  const path=`media/v2/${"a".repeat(64)}.png`,policy={access:"owner" as const,owner:"user-a",expiresAt:Date.now()+60000};
+  expect(()=>accessCookie(path,policy)).toThrow("Cookie signing unavailable");
 });

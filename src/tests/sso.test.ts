@@ -2,6 +2,7 @@ import { afterEach, expect, test, vi } from "vitest";
 const { setSession } = vi.hoisted(() => ({ setSession: vi.fn().mockResolvedValue({ error: null }) }));
 vi.mock("../services/account", () => ({ accountClient: { auth: { setSession } } }));
 import { nexusOrigin, receiveNexusSession } from "../services/sso";
+import { useToolsPreferences } from "../store";
 afterEach(() => { vi.useRealTimers(); vi.clearAllMocks(); window.opener = null; history.replaceState(null, "", "/"); });
 test("SSO rejects wrong origin, source and nonce; consumes a valid response once", async () => {
   vi.useFakeTimers();
@@ -10,16 +11,19 @@ test("SSO rejects wrong origin, source and nonce; consumes a valid response once
   const nonce = "a".repeat(64);
   history.replaceState(null, "", `/?nexus_sso=${nonce}`);
   const pending = receiveNexusSession();
-  const data = { type: "nexus:session", nonce, access_token: "access", refresh_token: "refresh" };
+  useToolsPreferences.setState({ theme: "dark" });
+  const data = { type: "nexus:session", nonce, access_token: "access", refresh_token: "refresh", theme: "mono" };
   const send = (origin: string, source: unknown, payload = data) => window.dispatchEvent(new MessageEvent("message", { origin, source: source as Window, data: payload }));
   send("https://attacker.example", opener);
   send(nexusOrigin, window);
   send(nexusOrigin, opener, { ...data, nonce: "wrong" });
   expect(setSession).not.toHaveBeenCalled();
+  expect(useToolsPreferences.getState().theme).toBe("dark");
   send(nexusOrigin, opener);
   send(nexusOrigin, opener);
   await pending;
   expect(setSession).toHaveBeenCalledTimes(1);
+  expect(useToolsPreferences.getState().theme).toBe("mono");
   expect(location.search).toBe("");
   expect(window.opener).toBeNull();
 });

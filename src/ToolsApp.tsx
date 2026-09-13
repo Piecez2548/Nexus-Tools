@@ -65,7 +65,6 @@ export default function ToolsApp() {
   );
   useEffect(() => {
     document.documentElement.lang = language;
-    document.documentElement.dataset.toolsTheme = theme;
     const shortcut = (event: KeyboardEvent) => {
       if (
         (event.ctrlKey || event.metaKey) &&
@@ -80,7 +79,7 @@ export default function ToolsApp() {
     };
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
-  }, [language, theme, activeTool, mobileOpen]);
+  }, [language, activeTool, mobileOpen]);
   const navigate = (next: typeof view, nextCategory: CategoryId = "all") => {
     setView(next);
     setCategory(nextCategory);

@@ -45,7 +45,7 @@ export default function AccountPanel({ expanded = false }: { expanded?: boolean 
         </fieldset>
       </form>
     </>}
-    <a className="account-link" href="https://nexus-lemon-eight-32.vercel.app" target="_blank" rel="noopener noreferrer">{th ? "เปิด Nexus All / กู้คืนรหัสผ่าน" : "Open Nexus All / Recover password"}</a>
+    <a className="account-link" href="https://nexus-lemon-eight-32.vercel.app/projects" target="_blank" rel="noopener noreferrer">{th ? "เปิด Nexus All / กู้คืนรหัสผ่าน" : "Open Nexus All / Recover password"}</a>
     <p role={failed ? "alert" : "status"}>{busy ? (th ? "กำลังดำเนินการ…" : "Working…") : message}</p>
   </>;
   return expanded ? <section className="account-panel">{content}</section> : <details className="account-panel"><summary>{th ? "บัญชี Nexus / ซิงก์ข้อมูล" : "Nexus account / Cloud sync"}</summary>{content}</details>;

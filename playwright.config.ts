@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
+  testIgnore: /release-performance\.spec\.ts/,
   timeout: 45_000,
   // Remote deployments may need to fetch a cold PDF/OCR chunk before showing results.
   expect: { timeout: 15_000 },
@@ -13,10 +14,10 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium-tools", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox-tools", testIgnore: /media-live/, use: { ...devices["Desktop Firefox"] } },
-    { name: "webkit-tools", testIgnore: /media-live/, use: { ...devices["Desktop Safari"] } },
-    { name: "mobile-chrome", grep: /mobile menu|mobile file|backup restore|account sign/, testIgnore: /media-live/, use: { ...devices["Pixel 7"] } },
-    { name: "mobile-webkit", grep: /mobile menu|mobile file|backup restore|account sign/, testIgnore: /media-live/, use: { ...devices["iPhone 13"] } },
+    { name: "firefox-tools", testIgnore: /release-performance\.spec\.ts|media-live/, use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit-tools", testIgnore: /release-performance\.spec\.ts|media-live/, use: { ...devices["Desktop Safari"] } },
+    { name: "mobile-chrome", grep: /mobile menu|mobile file|backup restore|account sign/, testIgnore: /release-performance\.spec\.ts|media-live/, use: { ...devices["Pixel 7"] } },
+    { name: "mobile-webkit", grep: /mobile menu|mobile file|backup restore|account sign/, testIgnore: /release-performance\.spec\.ts|media-live/, use: { ...devices["iPhone 13"] } },
   ],
   webServer: process.env.TOOLS_BASE_URL
     ? undefined

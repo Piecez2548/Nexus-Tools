@@ -28,6 +28,15 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - name: Generate production dependency SBOM
+        run: npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --omit dev --output-reproducible --validate --output-file nexus-tools-npm-sbom.cdx.json
+      - name: Upload dependency SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: nexus-tools-npm-sbom
+          path: nexus-tools-npm-sbom.cdx.json
+          retention-days: 90
       - run: npm run lint
       - run: npm run build
         env:
@@ -37,6 +46,8 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
+      - name: Isolated performance budget
+        run: npx playwright test --config=e2e/performance.config.ts
       - name: Save failed browser test traces
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -78,6 +89,10 @@ jobs:
         env:
           TOOLS_BASE_URL: https://nexus-tools-chi.vercel.app
         run: npm run test:e2e
+      - name: Check production performance budget
+        env:
+          TOOLS_BASE_URL: https://nexus-tools-chi.vercel.app
+        run: npx playwright test --config=e2e/performance.config.ts
       - name: Save failed production test traces
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

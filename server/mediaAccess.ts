@@ -14,7 +14,7 @@ export async function readPolicy(path: string): Promise<MediaPolicy | null> {
 }
 export const cookieName = (path: string) => `nexus-media-${path.split("/").at(-1)!.slice(0, 24)}`;
 function signature(path: string, expires: number, owner: string) {
-  const secret = process.env.MEDIA_ADMIN_KEY;
+  const secret = process.env.MEDIA_COOKIE_SIGNING_KEY;
   if (!secret || secret.length < 32) throw new Error("Cookie signing unavailable");
   return createHmac("sha256", secret).update(`${path}:${expires}:${owner}`).digest("hex");
 }

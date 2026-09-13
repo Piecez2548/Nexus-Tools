@@ -1,4 +1,5 @@
 import { accountClient } from "./account";
+import { useToolsPreferences } from "../store";
 
 export const nexusOrigin = "https://nexus-lemon-eight-32.vercel.app";
 
@@ -23,6 +24,10 @@ export function receiveNexusSession(): Promise<void> {
       const { access_token, refresh_token } = event.data;
       if (typeof access_token !== "string" || typeof refresh_token !== "string" || access_token.length > 8192 || refresh_token.length > 8192) return;
       consumed = true;
+      const theme = event.data.theme;
+      if (theme === "dark" || theme === "light" || theme === "system" || theme === "mono") {
+        useToolsPreferences.setState({ theme });
+      }
       clearInterval(interval);
       // AuthGate subsequently verifies the user with Supabase and enforces MFA.
       void accountClient!.auth.setSession({ access_token, refresh_token }).then(finish, finish);

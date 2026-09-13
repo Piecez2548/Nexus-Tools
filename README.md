@@ -1,5 +1,7 @@
 # Nexus Tools
 
+> Performance regression checks run separately from the functional browser matrix via `npx playwright test --config=e2e/performance.config.ts` (Chromium, one worker). CI runs both groups locally and against production so CPU/network throttling does not compete with functional tests.
+
 ศูนย์รวมเครื่องมือสำหรับ PDF รูปภาพ ข้อความ QR Code และเอกสารธุรกิจ รองรับภาษาไทยและอังกฤษ พร้อมธีมสว่าง/มืด การค้นหา หมวดหมู่ รายการโปรด และเครื่องมือที่ใช้ล่าสุด
 
 - **เว็บไซต์:** [nexus-tools-chi.vercel.app](https://nexus-tools-chi.vercel.app/)
@@ -278,3 +280,28 @@ API ตรวจรหัสผู้ดูแลก่อนออก token อ
 ใช้ `package-lock.json` และ `npm ci` เพื่อให้ติดตั้งตรงกัน ทดสอบ build, unit tests และ E2E หลังปรับ dependencies ที่เกี่ยวกับไฟล์/worker/API
 
 PDF.js และ Tesseract.js ใช้ Apache-2.0 ส่วนแพ็กเกจข้อมูลภาษาที่ใช้อยู่ระบุ MIT สคริปต์เตรียม assets คัดลอกประกาศสิทธิ์ไปกับ runtime assets ให้เก็บประกาศเหล่านี้ไว้เมื่อนำไฟล์ไปเผยแพร่ต่อ สิทธิ์ของ dependency แต่ละรายการเป็นไปตาม license ของแพ็กเกจนั้น
+
+### Shared Nexus theme (2026-08-31)
+
+All Tools surfaces, including authentication and shared media, inherit `src/nexusTheme.css`. This file and the Manrope/Noto Sans Thai fonts are vendored from the sibling Nexus application. Run `node scripts/sync-theme.mjs` to update them or append `--check` to detect drift. Keep layout in `tools.css` and use shared tokens for new UI. Preferences remain local between independent visits; a verified Main session handoff now carries Dark/Light/System/Mono to Tools. This synchronizes on launch, not continuously between tabs. Semantic category/status colors and document previews retain their meaning.
+
+### Current access policy (2026-09-01)
+
+Tools local PDF/image/QR/document utilities render immediately without login, including direct visits and account-verification failures. Optional account initialization and secure SSO remain. Verified identity and enrolled MFA protect cloud functions and private APIs, not the public catalogue. Signing out leaves local utilities and documents available; no cloud data is uploaded automatically. Main/All sign-in and Main PIN remain independent. Historical central-entry redirects below are superseded. Deployment/validation evidence is in the Main repository's `docs/AUDIT_REMEDIATION_2026-09-01.md`.
+
+### Historical central sign-in at Nexus All (2026-08-31; superseded)
+
+Tools no longer renders a separate sign-in page at its entry. It first attempts the existing secure Nexus opener handoff and validates the account/MFA. A verified session opens Tools immediately without a Main PIN. Direct visits without a session redirect to `https://nexus-lemon-eight-32.vercel.app/projects`; after signing in, launch Tools from All. Verification failures stay closed and offer a link to All. Existing valid sessions may be reused, and explicit public media-sharing links remain unchanged. A URL marker or referrer never grants access. This change has not been deployed.
+
+### Neutral palette production release (2026-08-31)
+
+Deployed as `dpl_9J4khd2MVsxRdKDNzdD2FEuQpQk1` to https://nexus-tools-chi.vercel.app. This release includes the shared neutral charcoal palette and the previously local central sign-in behavior. It supersedes earlier not-deployed notes. Build, TypeScript, ESLint, 52 unit tests and 10 theme/auth browser cases passed; a clean production browser was redirected to All on anonymous entry.
+
+### Formal workspace changes — deployed 2026-08-31
+
+Shared action dimensions, larger metadata, minimum 44px controls, and lazy per-tool modules. ToolWorkspace shell is now approximately 3.9 kB minified instead of the previous 515 kB combined module; feature/vendor payloads still load when required. Accessibility regression checks use axe-core in the local mocked-auth fixture.
+
+Current production: `dpl_HGpCihcZJ959BW2kBwQzumRyicmR` at https://nexus-tools-chi.vercel.app. The shared nested-modal hook now closes only the top overlay. Root TypeScript lib/target matches the ES2023 app/server configs for Vercel function compilation. Final cloud build has no TS2550 errors.
+
+
+Black–purple palette deployed 2026-08-31: `dpl_B9XR9t56jitVRGA51uv9HoTWxhPn` (READY). Shared canonical tokens remain synchronized with Main/All; semantic category colors are preserved. Build/TypeScript, ESLint, 53 unit tests and 7 theme/accessibility browser tests passed.

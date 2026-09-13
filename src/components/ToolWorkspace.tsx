@@ -1,16 +1,16 @@
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { useModalA11y } from "@/shared/useModalA11y";
 import { useLanguageStore } from "@/shared/languageStore";
 import { categories, type Tool } from "../catalog";
-import FileTools from "./FileTools";
-import TextTools from "./TextTools";
-import InvoiceTool from "./InvoiceTool";
-import QrTool from "./QrTool";
-import PdfStudio from "./PdfStudio";
-import ImageStudio from "./ImageStudio";
-import OcrTool from "./OcrTool";
-import ExtendedTextTools from "./ExtendedTextTools";
+const FileTools = lazy(() => import("./FileTools"));
+const TextTools = lazy(() => import("./TextTools"));
+const InvoiceTool = lazy(() => import("./InvoiceTool"));
+const QrTool = lazy(() => import("./QrTool"));
+const PdfStudio = lazy(() => import("./PdfStudio"));
+const ImageStudio = lazy(() => import("./ImageStudio"));
+const OcrTool = lazy(() => import("./OcrTool"));
+const ExtendedTextTools = lazy(() => import("./ExtendedTextTools"));
 export default function ToolWorkspace({
   tool,
   onClose,
@@ -63,6 +63,7 @@ export default function ToolWorkspace({
           </button>
         </div>
         <p className="workspace-description">{tool.description[language]}</p>
+        <Suspense fallback={<p role="status">{language === "th" ? "กำลังโหลดเครื่องมือ…" : "Loading tool…"}</p>}>
         {tool.id === "qr-code" ? (
           <QrTool />
         ) : tool.id === "pdf-studio" || tool.id === "pdf-text" ? (
@@ -83,6 +84,7 @@ export default function ToolWorkspace({
         ) : (
           <FileTools mode={tool.id} />
         )}
+        </Suspense>
         <div className="workspace-privacy">
           <ShieldCheck size={15} />
           {language === "th"

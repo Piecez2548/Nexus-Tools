@@ -1,58 +1,36 @@
 import { test, expect } from "@playwright/test";
 import { mockAccount, session } from "./auth-fixture.js";
+const all = "https://nexus-lemon-eight-32.vercel.app/projects";
 
-test("account sign in gate, rejection, successful login and logout", async ({ page }, info) => {
-  await mockAccount(page, false);
-  await page.goto("/");
-  await expect(page.locator(".tool-card")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Sign in", exact: true })).toBeVisible();
-  await page.screenshot({ path: info.outputPath("sign-in.png"), fullPage: true });
-  await page.getByLabel("Email", { exact: true }).fill("test@example.com");
-  await page.getByLabel("Password", { exact: true }).fill("incorrect-password");
-  await page.route("**/auth/v1/token**", route => route.fulfill({ status: 400, json: { error_code: "invalid_credentials", msg: "Invalid login credentials" } }));
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Unable to complete");
-  await expect(page.locator(".tool-card")).toHaveCount(0);
-  await page.unroute("**/auth/v1/token**");
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.locator(".tool-card")).toHaveCount(17);
-  await page.reload();
-  await expect(page.locator(".tool-card")).toHaveCount(17);
-  await page.getByText("Nexus account / Cloud sync", { exact: true }).click();
-  await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Sign in", exact: true })).toBeVisible();
-  await expect(page.locator(".tool-card")).toHaveCount(0);
-});
+for (const suffix of ["/", "/?from=all", "/?nexus_sso=" + "a".repeat(64)]) {
+  test(`direct Tools entry ${suffix} opens public tools without login`, async ({ page }) => {
+    await mockAccount(page, false);
+    await page.route(all, route => route.fulfill({ contentType: "text/html", body: "<h1>Nexus All sign in</h1>" }));
+    await page.goto(suffix);
+    await expect(page.locator(".tool-card")).toHaveCount(17);
+    await expect(page.getByRole("button", { name: "Sync business data", exact: true })).toHaveCount(0);
+  });
+}
 
 test("account sign in cannot skip an enrolled MFA factor", async ({ page }) => {
   await mockAccount(page);
-  const user = { ...session().user, factors: [{ id: "factor-id", factor_type: "totp", status: "verified", friendly_name: "Authenticator" }] };
-  let verified = false;
-  await page.route("**/auth/v1/**", route => {
-    const path = new URL(route.request().url()).pathname;
-    if (path.endsWith("/challenge")) return route.fulfill({ json: { id: "challenge-id", expires_at: 9999999999 } });
-    if (path.endsWith("/verify")) { verified = true; return route.fulfill({ json: { ...session("aal2"), user } }); }
-    return route.fulfill({ json: path.endsWith("/user") ? user : { ...session(verified ? "aal2" : "aal1"), user } });
-  });
+  const user = { ...session().user, factors: [{ id: "factor-id", factor_type: "totp", status: "verified" }] };
+  await page.route("**/auth/v1/**", route => route.fulfill({ json: route.request().url().endsWith("/user") ? user : { ...session("aal1"), user } }));
+  await page.route(all, route => route.fulfill({ contentType: "text/html", body: "<h1>Nexus All sign in</h1>" }));
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Two-factor verification" })).toBeVisible();
-  await expect(page.locator(".tool-card")).toHaveCount(0);
-  await page.getByLabel("Verification code").fill("123456");
-  await page.getByRole("button", { name: "Verify", exact: true }).click();
   await expect(page.locator(".tool-card")).toHaveCount(17);
+  await page.getByText("Nexus account / Cloud sync", { exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Two-factor verification" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sync business data", exact: true })).toHaveCount(0);
 });
 
-test("account sign up requires email verification before tools mount", async ({ page }) => {
-  await mockAccount(page, false);
+test("verified account signs out while public tools remain usable", async ({ page }) => {
+  await mockAccount(page);
+  await page.route(all, route => route.fulfill({ contentType: "text/html", body: "<h1>Nexus All sign in</h1>" }));
   await page.goto("/");
-  await page.getByRole("button", { name: "New here? Create an account" }).click();
-  await page.getByLabel("Email", { exact: true }).fill("test@example.com");
-  await page.getByLabel("Password", { exact: true }).fill("test-password-only");
-  await page.getByRole("button", { name: "Create account", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Verify your email" })).toBeVisible();
-  await expect(page.locator(".tool-card")).toHaveCount(0);
-  await page.getByLabel("Verification code").fill("123456");
-  await page.getByRole("button", { name: "Verify", exact: true }).click();
+  await expect(page.locator(".tool-card")).toHaveCount(17);
+  await page.getByText("Nexus account / Cloud sync", { exact: true }).click();
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page.locator(".tool-card")).toHaveCount(17);
 });
 
@@ -75,7 +53,7 @@ test("account sign in from Nexus hands off session without credentials in URL", 
   await page.getByRole("button", { name: "Tools", exact: true }).click();
   const child = await opened;
   await expect(child.locator(".tool-card")).toHaveCount(17);
-  expect(child.url()).not.toContain("nexus_sso");
-  expect(child.url()).not.toContain("token");
-  expect(await child.evaluate(() => window.opener === null)).toBe(true);
+  await expect.poll(() => child.evaluate(() => location.href)).not.toContain("nexus_sso");
+  await expect.poll(() => child.evaluate(() => location.href)).not.toContain("token");
+  await expect.poll(() => child.evaluate(() => window.opener === null)).toBe(true);
 });

@@ -7,7 +7,7 @@ interface ToolsPreferences {
   recent: string[];
   recordRecent: (id: string) => void;
   clearRecent: () => void;
-  theme: "dark" | "light";
+  theme: "dark" | "light" | "system" | "mono";
   toggleFavorite: (id: string) => void;
   toggleTheme: () => void;
 }
@@ -42,7 +42,7 @@ export const useToolsPreferences = create<ToolsPreferences>()(
                 .filter((id) => toolCatalog.some((t) => t.id === id))
                 .slice(0, 8)
             : [],
-          theme: saved?.theme === "light" ? "light" : "dark",
+          theme: saved?.theme === "light" || saved?.theme === "mono" || saved?.theme === "system" ? saved.theme : "dark",
           favorites: Array.isArray(saved?.favorites)
             ? saved.favorites.filter((id) =>
                 toolCatalog.some((tool) => tool.id === id),

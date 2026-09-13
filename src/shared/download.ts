@@ -13,5 +13,7 @@ export function downloadFile(filename: string, content: string | Blob, mimeType:
   link.download = filename;
   link.click();
 
-  URL.revokeObjectURL(url);
+  // WebKit can start consuming the Blob asynchronously after click();
+  // revoking in the same turn can cancel the download before it begins.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
