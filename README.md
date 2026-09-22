@@ -1,21 +1,21 @@
-# Nexus Tools
+# Nexus Tools — Document and Media Workspace
 
 [![Live Demo](https://img.shields.io/badge/demo-live-7c3aed)](https://nexus-tools-chi.vercel.app/)
 [![CI](https://github.com/Piecez2548/Nexus-Tools/actions/workflows/ci.yml/badge.svg)](https://github.com/Piecez2548/Nexus-Tools/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)](https://www.typescriptlang.org/)
 
-Production-ready bilingual web workspace for PDF, image, OCR, QR, text, and business-document workflows. It combines client-side file processing with authenticated cloud sync, protected media delivery, responsive accessibility, and automated cross-browser release checks.
+Nexus Tools is a bilingual document and media workspace for PDF, image, OCR, QR, text, and business-document workflows. It combines browser-local processing with authenticated cloud synchronization, protected media delivery, accessible responsive interfaces, and automated cross-browser validation.
 
-เว็บรวมเครื่องมือสำหรับ PDF รูปภาพ OCR ข้อความ QR Code และเอกสารธุรกิจ รองรับภาษาไทยและอังกฤษ พร้อมระบบบัญชี ซิงก์ข้อมูล ธีมสว่าง/มืด การค้นหา หมวดหมู่ รายการโปรด และประวัติการใช้งานล่าสุด
+Nexus Tools เป็น workspace สำหรับเอกสารและสื่อ รองรับ PDF รูปภาพ OCR ข้อความ QR Code และเอกสารธุรกิจ พร้อมภาษาไทยและอังกฤษ ระบบบัญชี การซิงก์ข้อมูล การค้นหา หมวดหมู่ รายการโปรด และประวัติการใช้งาน
 
 - **Live demo:** [nexus-tools-chi.vercel.app](https://nexus-tools-chi.vercel.app/)
 - **Source code:** [github.com/Piecez2548/Nexus-Tools](https://github.com/Piecez2548/Nexus-Tools)
 - **โปรเจกต์ Vercel:** `nexus-tools` แยกจากโปรเจกต์ `nexus`
 - **อัปเดตเอกสาร:** 13 กันยายน 2026
 
-## Portfolio highlights
+## Capabilities
 
-- 17 practical tools with lazy-loaded workspaces to keep the initial interface lightweight
+- 17 tools with lazy-loaded workspaces to keep the initial interface lightweight
 - Direct A4 PDF generation for quotations, invoices, and receipts with Thai text, watermarks, logos, signatures, tax, and PromptPay QR
 - Browser-local PDF/image/OCR processing with explicit limits, validation, recoverable errors, and no upload for ordinary tools
 - Supabase authentication with email verification and MFA enforcement, plus a nonce-bound cross-origin session handoff from Nexus
@@ -32,7 +32,7 @@ Production-ready bilingual web workspace for PDF, image, OCR, QR, text, and busi
 
 > เครื่องมือทั่วไปประมวลผลไฟล์ในเบราว์เซอร์ ส่วน **อัปโหลดสื่อ Nexus** และ **ซิงก์ข้อมูลธุรกิจ** จะส่งข้อมูลไป private Vercel Blob เมื่อผู้ใช้ยืนยัน เลือกสิทธิ์สื่อและวันหมดอายุก่อนแชร์ ข้อมูลคลาวด์ไม่ได้เข้ารหัสแบบ end-to-end
 
-## ฟังก์ชันที่มีแล้ว
+## Available capabilities
 
 รายการในหน้าเว็บมี 17 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
 
@@ -326,3 +326,5 @@ Current production: `dpl_HGpCihcZJ959BW2kBwQzumRyicmR` at https://nexus-tools-ch
 
 
 Black–purple palette deployed 2026-08-31: `dpl_B9XR9t56jitVRGA51uv9HoTWxhPn` (READY). Shared canonical tokens remain synchronized with Main/All; semantic category colors are preserved. Build/TypeScript, ESLint, 53 unit tests and 7 theme/accessibility browser tests passed.
+
+
