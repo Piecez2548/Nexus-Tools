@@ -52,6 +52,9 @@ export async function recognizeFile(
       await worker.terminate();
       throw new DOMException("Cancelled", "AbortError");
     }
+    // Thai has no spaces between words; without this Tesseract separates
+    // every Thai glyph with a space ("ส ว ั ส ด ี").
+    if (language.includes("tha")) await worker.setParameters({ preserve_interword_spaces: "1" });
     if (
       file.type === "application/pdf" ||
       file.name.toLowerCase().endsWith(".pdf")

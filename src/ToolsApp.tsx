@@ -1,4 +1,5 @@
 import AccountPanel from "./components/AccountPanel";
+import ToolLoadBoundary from "./components/ToolLoadBoundary";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
@@ -105,7 +106,12 @@ export default function ToolsApp() {
         className={`sidebar ${mobileOpen ? "is-open" : ""}`}
         aria-label={text("Main navigation", "เมนูหลัก")}
       >
-        <a className="brand" href="#" onClick={() => navigate("home")}>
+        <a
+          className="brand"
+          href="/"
+          aria-label={text("Nexus Tools home", "หน้าแรก Nexus Tools")}
+          onClick={(event) => { event.preventDefault(); navigate("home"); }}
+        >
           <span className="brand-mark">N</span>
           <span>
             Nexus <b>Tools</b>
@@ -507,18 +513,20 @@ export default function ToolsApp() {
         </main>
       </div>
       {activeTool && (
-        <Suspense
-          fallback={
-            <div className="loading-notice" role="status">
-              {text("Opening tool…", "กำลังเปิดเครื่องมือ…")}
-            </div>
-          }
-        >
-          <ToolWorkspace
-            tool={activeTool}
-            onClose={() => setActiveTool(null)}
-          />
-        </Suspense>
+        <ToolLoadBoundary key={activeTool.id} th={language === "th"} onClose={() => setActiveTool(null)}>
+          <Suspense
+            fallback={
+              <div className="loading-notice" role="status">
+                {text("Opening tool…", "กำลังเปิดเครื่องมือ…")}
+              </div>
+            }
+          >
+            <ToolWorkspace
+              tool={activeTool}
+              onClose={() => setActiveTool(null)}
+            />
+          </Suspense>
+        </ToolLoadBoundary>
       )}
     </div>
   );

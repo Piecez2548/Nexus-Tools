@@ -12,6 +12,12 @@ import { useToolRunner } from "../hooks/useToolRunner";
 import ResultPanel from "./ResultPanel";
 import { readDraft, saveLocal, removeLocal } from "../services/localData";
 import { prepareLogo } from "../services/logo";
+
+function localToday() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+}
+
 export default function InvoiceTool() {
   const { language } = useLanguageStore();
   const t = (en: string, th: string) => (language === "th" ? th : en);
@@ -28,11 +34,12 @@ export default function InvoiceTool() {
   const [logo, setLogo] = useState(""),
     [draftMessage, setDraftMessage] = useState("");
 
+  // The date is required; start from today (local time) so preview works at once.
+  const [date, setDate] = useState(localToday);
   const [seller, setSeller] = useState(""),
     [customer, setCustomer] = useState(""),
-    [number, setNumber] = useState(() => suggestNumber("invoice", ""));
-  const [date, setDate] = useState(""),
-    [currency, setCurrency] = useState("THB"),
+    [number, setNumber] = useState(() => suggestNumber("invoice", date));
+  const [currency, setCurrency] = useState("THB"),
     [tax, setTax] = useState("0");
   const [items, setItems] = useState<InvoiceItem[]>([
     { description: "", quantity: "1", price: "0" },

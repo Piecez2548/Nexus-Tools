@@ -337,7 +337,15 @@ export default function PdfStudio({
                   ? "ลายน้ำพาดเฉียงกลางหน้า ตัวใหญ่ สีจาง 18% ไม่บังเนื้อหา"
                   : "Large diagonal watermark across the center, at a subtle 18% opacity."}
               </p>
-              <button className="button">
+              {/* Exporting with no edits would silently return the original pages. */}
+              {textEditor && edits.length === 0 && (
+                <p className="field-hint" role="status">
+                  {th
+                    ? "ยังไม่มีการแก้ไข กด \"เพิ่มการแก้ไขในหน้านี้\" อย่างน้อย 1 รายการก่อนส่งออก"
+                    : "No edits yet. Press \"Add edit to this page\" at least once before exporting."}
+                </p>
+              )}
+              <button className="button" disabled={textEditor && edits.length === 0}>
                 {th ? "ส่งออก PDF" : "Export PDF"}
               </button>
             </fieldset>

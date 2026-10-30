@@ -3,7 +3,10 @@ import { createRoot } from "react-dom/client";
 import MediaViewer from "./components/MediaViewer";
 import ToolsApp from "./ToolsApp";
 import { ThemeEffect } from "./shared/ThemeEffect";
+import { installStaleChunkReload } from "./shared/staleChunkReload";
 import "./tools.css";
+
+installStaleChunkReload();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
