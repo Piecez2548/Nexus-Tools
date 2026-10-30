@@ -1,6 +1,6 @@
 import AccountPanel from "./components/AccountPanel";
 import ToolLoadBoundary from "./components/ToolLoadBoundary";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowRight,
@@ -27,6 +27,7 @@ import {
   type CategoryId,
   type Tool,
 } from "./catalog";
+import { useToolRoute } from "./hooks/useToolRoute";
 import { useToolsPreferences } from "./store";
 
 const ToolWorkspace = lazy(() => import("./components/ToolWorkspace"));
@@ -48,7 +49,18 @@ export default function ToolsApp() {
   const [view, setView] = useState<"home" | "all" | "favorites">("home");
   const [sort, setSort] = useState("recommended");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeTool, setActiveTool] = useState<Tool | null>(null);
+  const toolTitle = useCallback((tool: Tool) => tool.name[language], [language]);
+  const { activeTool, openTool, closeTool, markDirty } = useToolRoute(
+    toolTitle,
+    text(
+      "Leave this tool? Your unsaved work will be lost.",
+      "ออกจากเครื่องมือนี้หรือไม่? งานที่ยังไม่ได้บันทึกจะหายไป",
+    ),
+  );
+  const activeToolId = activeTool?.id;
+  useEffect(() => {
+    if (activeToolId) recordRecent(activeToolId);
+  }, [activeToolId, recordRecent]);
   const searchRef = useRef<HTMLInputElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   useModalA11y({
@@ -329,10 +341,7 @@ export default function ToolsApp() {
                   <button
                     key={id}
                     className="button secondary"
-                    onClick={() => {
-                      recordRecent(id);
-                      setActiveTool(tool);
-                    }}
+                    onClick={() => openTool(tool)}
                   >
                     {tool.name[language]}
                   </button>
@@ -386,8 +395,7 @@ export default function ToolsApp() {
                       className="tool-card-main"
                       onClick={(event) => {
                         event.currentTarget.focus();
-                        recordRecent(tool.id);
-                        setActiveTool(tool);
+                        openTool(tool);
                       }}
                       aria-label={`${text("Open", "เปิด")} ${tool.name[language]}`}
                     >
@@ -513,7 +521,7 @@ export default function ToolsApp() {
         </main>
       </div>
       {activeTool && (
-        <ToolLoadBoundary key={activeTool.id} th={language === "th"} onClose={() => setActiveTool(null)}>
+        <ToolLoadBoundary key={activeTool.id} th={language === "th"} onClose={closeTool}>
           <Suspense
             fallback={
               <div className="loading-notice" role="status">
@@ -523,7 +531,8 @@ export default function ToolsApp() {
           >
             <ToolWorkspace
               tool={activeTool}
-              onClose={() => setActiveTool(null)}
+              onClose={closeTool}
+              onEdit={markDirty}
             />
           </Suspense>
         </ToolLoadBoundary>

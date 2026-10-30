@@ -14,9 +14,11 @@ const ExtendedTextTools = lazy(() => import("./ExtendedTextTools"));
 export default function ToolWorkspace({
   tool,
   onClose,
+  onEdit,
 }: {
   tool: Tool;
   onClose: () => void;
+  onEdit: () => void;
 }) {
   const { language } = useLanguageStore();
   const panel = useRef<HTMLElement>(null);
@@ -38,6 +40,9 @@ export default function ToolWorkspace({
     >
       <section
         ref={panel}
+        onInputCapture={onEdit}
+        onChangeCapture={onEdit}
+        onDropCapture={onEdit}
         role="dialog"
         aria-modal="true"
         aria-labelledby="workspace-title"
