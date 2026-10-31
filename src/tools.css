@@ -1355,3 +1355,9 @@ html[data-tools-theme="light"] .favorite-button.saved {
 .account-panel fieldset { min-width: 0; }
 .account-panel button { min-height: 44px; }
 .account-link { display: inline-block; margin-top: 20px; text-decoration: underline; text-underline-offset: 4px; }
+.calculation-result.words strong {font-size:22px;line-height:1.7;font-weight:500;}
+.date-rows {display:grid;gap:12px;margin:0;}
+.date-rows > div {display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;}
+.date-rows dt {font-size:13px;color:var(--muted);}
+.date-rows dd {margin:0;font-weight:500;overflow-wrap:anywhere;}
+.year-row {grid-template-columns:1fr 0 1fr;}
