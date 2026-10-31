@@ -34,6 +34,19 @@ test("verified account signs out while public tools remain usable", async ({ pag
   await expect(page.locator(".tool-card")).toHaveCount(28);
 });
 
+test("a click on the account panel before its code has loaded still opens it", async ({ page }) => {
+  await mockAccount(page);
+  await page.route(all, route => route.fulfill({ contentType: "text/html", body: "<h1>Nexus All sign in</h1>" }));
+  // Hold the panel code back so the click lands on the placeholder, as on a slow connection.
+  await page.route("**/assets/AccountPanel-*.js", async route => {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    await route.continue();
+  });
+  await page.goto("/");
+  await page.getByText("Nexus account / Cloud sync", { exact: true }).click();
+  await expect(page.getByRole("button", { name: "Sign out", exact: true })).toBeVisible({ timeout: 15_000 });
+});
+
 test("account sign in from Nexus hands off session without credentials in URL", async ({ page, context, baseURL }) => {
   const origin = "https://nexus-lemon-eight-32.vercel.app";
   await page.route(`${origin}/**`, route => route.fulfill({ contentType: "text/html", body: '<button id="launch">Tools</button>' }));

@@ -30,8 +30,9 @@ import {
 import { useToolRoute } from "./hooks/useToolRoute";
 import { useToolsPreferences } from "./store";
 
-// The account panel brings in the Supabase client, so it loads after the first paint.
-const AccountPanel = lazy(() => import("./components/AccountPanel"));
+// The account form brings in the Supabase client, so it loads after the first paint. The collapsible
+// panel itself stays in place, so a click made before the form arrives is never lost.
+const AccountContent = lazy(() => import("./components/AccountPanel").then((module) => ({ default: module.AccountContent })));
 const ToolWorkspace = lazy(() => import("./components/ToolWorkspace"));
 
 export default function ToolsApp() {
@@ -51,8 +52,6 @@ export default function ToolsApp() {
   const [view, setView] = useState<"home" | "all" | "favorites">("home");
   const [sort, setSort] = useState("recommended");
   const [mobileOpen, setMobileOpen] = useState(false);
-  // Remembers a click on the account panel made before its code finished loading.
-  const [accountOpened, setAccountOpened] = useState(false);
   const toolTitle = useCallback((tool: Tool) => tool.name[language], [language]);
   const { activeTool, openTool, closeTool, setDirty } = useToolRoute(
     toolTitle,
@@ -291,15 +290,12 @@ export default function ToolsApp() {
           </div>
         </header>
         <main id="tools-main" tabIndex={-1}>
-          <Suspense
-            fallback={
-              <details className="account-panel" onToggle={(event) => setAccountOpened(event.currentTarget.open)}>
-                <summary>{text("Nexus account / Cloud sync", "บัญชี Nexus / ซิงก์ข้อมูล")}</summary>
-              </details>
-            }
-          >
-            <AccountPanel initiallyOpen={accountOpened} />
-          </Suspense>
+          <details className="account-panel">
+            <summary>{text("Nexus account / Cloud sync", "บัญชี Nexus / ซิงก์ข้อมูล")}</summary>
+            <Suspense fallback={null}>
+              <AccountContent />
+            </Suspense>
+          </details>
           {view === "home" && !query && (
             <section className="hero">
               <div className="eyebrow">
