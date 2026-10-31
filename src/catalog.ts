@@ -235,6 +235,13 @@ export const toolCatalog = [
 ] as const;
 export type Tool = (typeof toolCatalog)[number];
 export type ToolId = Tool["id"];
+// `/ocr/` is the runtime asset folder, so the OCR tool needs a different address.
+const slugOverrides: Partial<Record<ToolId, string>> = { ocr: "ocr-thai-english" };
+export const toolPath = (id: ToolId) => `/${slugOverrides[id] ?? id}`;
+export const toolFromPath = (pathname: string): Tool | null => {
+  const path = pathname.replace(/\/+$/, "");
+  return toolCatalog.find((tool) => toolPath(tool.id) === path) ?? null;
+};
 export function filterTools(
   query: string,
   category: CategoryId,

@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /*?media=
+
+Sitemap: https://nexus-tools-chi.vercel.app/sitemap.xml

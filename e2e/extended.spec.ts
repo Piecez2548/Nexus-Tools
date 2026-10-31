@@ -262,7 +262,7 @@ test("invoice draft with logo persists only on explicit save and can be deleted"
   await page.getByLabel("Payment details").fill("Bank transfer - details provided separately");
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
   await page.reload();
-  await open(page, "Invoice Generator");
+  await expect(page).toHaveURL(/\/invoice$/);
   await page.getByRole("button", { name: "Load draft / reuse items" }).click();
   await expect(page.getByLabel("Seller / business")).toHaveValue(
     "Draft business",
