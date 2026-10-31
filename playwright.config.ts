@@ -11,6 +11,8 @@ export default defineConfig({
   use: {
     baseURL: process.env.TOOLS_BASE_URL || "http://127.0.0.1:4174",
     trace: "retain-on-failure",
+    // The offline spec turns the service worker on; elsewhere it would hide requests from page.route.
+    serviceWorkers: "block",
   },
   projects: [
     { name: "chromium-tools", use: { ...devices["Desktop Chrome"] } },
