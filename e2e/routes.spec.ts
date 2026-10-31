@@ -71,16 +71,32 @@ test("Back asks before discarding work and can stay", async ({ page }) => {
   await expect(page.getByRole("dialog")).toBeHidden();
 });
 
-test("a tool card is a real link that can open in a new tab", async ({ page, context }) => {
+test("a tool card is a real link that the browser can open in a new tab", async ({ page }) => {
   await page.goto("/");
   const card = page.getByRole("link", { name: /^(Open|เปิด) (Word Counter|นับคำและตัวอักษร)$/ });
   await expect(card).toHaveAttribute("href", "/word-counter");
-  const [opened] = await Promise.all([context.waitForEvent("page"), card.click({ modifiers: ["ControlOrMeta"] })]);
-  await expect(opened).toHaveURL(/\/word-counter$/);
-  await expect(opened.getByRole("dialog")).toBeVisible();
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("dialog")).toBeHidden();
-  await opened.close();
+  // Whether a browser opens a new tab is up to the browser. What this app must guarantee is that a
+  // modified click is left alone while a plain click is handled in the page.
+  const handled = await card.evaluate(async (link) => {
+    const outcomes: Record<string, boolean> = {};
+    for (const [name, init] of Object.entries({ ctrl: { ctrlKey: true }, meta: { metaKey: true }, shift: { shiftKey: true }, plain: {} })) {
+      let prevented = false;
+      // Registered on document, so it runs after the app's own handler and then stops the real navigation.
+      const record = (event: Event) => {
+        prevented = event.defaultPrevented;
+        event.preventDefault();
+      };
+      document.addEventListener("click", record, { once: true });
+      link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, ...init }));
+      document.removeEventListener("click", record);
+      outcomes[name] = prevented;
+    }
+    return outcomes;
+  });
+  expect(handled).toEqual({ ctrl: false, meta: false, shift: false, plain: true });
+  // Only the plain click opened the tool, here in the same page.
+  await expect(page).toHaveURL(/\/word-counter$/);
+  await expect(page.getByRole("dialog")).toBeVisible();
 });
 
 test("Back does not ask once the work is downloaded", async ({ page }) => {

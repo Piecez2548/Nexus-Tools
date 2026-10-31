@@ -28,6 +28,7 @@ A portfolio project: 28 everyday tools for Thai and English users that run in th
 - **Money is never a float.** Tax and VAT calculators work in integer satang with `BigInt` and round half up, with unit tests for the edge cases.
 - **Static pages for each tool.** A post-build script writes one HTML file per tool plus `sitemap.xml`, so crawlers and link previews see real titles and metadata before any JavaScript runs.
 - **Tested across browsers.** Vitest unit tests, plus Playwright end-to-end tests on Chromium, Firefox and WebKit, mobile profiles, accessibility (axe) and a mobile performance budget. CI runs the same suite against production after each deploy.
+- **Offline after the first visits.** A small service worker (`public/sw.js`) serves pages network-first and hashed assets cache-first, so pages and tools you have opened keep working without a connection. OCR language data and anything that calls an API still need the network.
 - **Defensive by default.** Strict CSP, no inline scripts, QR links open only for http/https, size and page limits on every file tool.
 
 ## Capabilities

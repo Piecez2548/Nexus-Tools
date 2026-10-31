@@ -10,6 +10,13 @@ const MediaViewer = lazy(() => import("./components/MediaViewer"));
 
 installStaleChunkReload();
 
+// Lets pages and tools that were opened before work offline. See public/sw.js.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  });
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeEffect />
