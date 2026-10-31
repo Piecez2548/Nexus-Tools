@@ -193,6 +193,28 @@ export async function editImage(
     bitmap.close();
   }
 }
+export async function zipEntries(
+  entries: Record<string, Uint8Array>,
+  signal: AbortSignal,
+) {
+  const { zip } = await import("fflate");
+  const bytes = await new Promise<Uint8Array<ArrayBuffer>>(
+    (resolve, reject) => {
+      const cancel = zip(entries, { level: 0 }, (err, data) => {
+        signal.removeEventListener("abort", abort);
+        if (err) reject(err);
+        else resolve(new Uint8Array(data));
+      });
+      const abort = () => {
+        cancel();
+        reject(new DOMException("Cancelled", "AbortError"));
+      };
+      signal.addEventListener("abort", abort, { once: true });
+      if (signal.aborted) abort();
+    },
+  );
+  return bytes;
+}
 export async function batchImages(
   files: File[],
   options: ImageOptions,
@@ -216,22 +238,7 @@ export async function batchImages(
     ] = new Uint8Array(await result.blob.arrayBuffer());
     await new Promise((r) => setTimeout(r, 0));
   }
-  const { zip } = await import("fflate");
-  const bytes = await new Promise<Uint8Array<ArrayBuffer>>(
-    (resolve, reject) => {
-      const cancel = zip(entries, { level: 0 }, (err, data) => {
-        signal.removeEventListener("abort", abort);
-        if (err) reject(err);
-        else resolve(new Uint8Array(data));
-      });
-      const abort = () => {
-        cancel();
-        reject(new DOMException("Cancelled", "AbortError"));
-      };
-      signal.addEventListener("abort", abort, { once: true });
-      if (signal.aborted) abort();
-    },
-  );
+  const bytes = await zipEntries(entries, signal);
   return {
     blob: new Blob([bytes], { type: "application/zip" }),
     filename: "nexus-images.zip",

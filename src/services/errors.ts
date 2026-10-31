@@ -43,6 +43,10 @@ export const messages: Record<string, { en: string; th: string }> = {
     en: "Enter text or a link up to 1,000 UTF-8 bytes.",
     th: "กรอกข้อความหรือลิงก์ไม่เกิน 1,000 ไบต์ UTF-8",
   },
+  qrread: {
+    en: "No QR code found. Use a sharp, well-lit image where the whole code is visible.",
+    th: "ไม่พบ QR Code ในรูป ใช้รูปที่คมชัด แสงพอ และเห็น QR ครบทั้งอัน",
+  },
   number: {
     en: "Enter a finite number within the allowed range.",
     th: "กรุณากรอกตัวเลขที่ถูกต้องและอยู่ในช่วงที่กำหนด",

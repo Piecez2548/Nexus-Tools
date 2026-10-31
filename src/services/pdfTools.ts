@@ -1,7 +1,8 @@
 import { drawWatermark } from "./watermark";
 import { PDFDocument, degrees } from "pdf-lib";
 import { ToolError } from "./errors";
-import { abortCheck, canvasBlob, readBitmap } from "./imageTools";
+import { abortCheck, canvasBlob, readBitmap, zipEntries } from "./imageTools";
+import { parsePageSelection } from "./pdf";
 import type { ToolResult } from "./files";
 export interface PdfPageEdit {
   index: number;
@@ -241,5 +242,56 @@ export async function editPdf(
     };
   } finally {
     await preview?.destroy();
+  }
+}
+export type PageImageFormat = "image/png" | "image/jpeg";
+export const pageImageScales = [1, 1.5, 2, 3] as const;
+/** Renders the chosen pages as images: one file for one page, otherwise a ZIP. */
+export async function pdfToImages(
+  file: File,
+  selection: string,
+  format: PageImageFormat,
+  scale: number,
+  signal: AbortSignal,
+): Promise<ToolResult> {
+  if (!pageImageScales.includes(scale as (typeof pageImageScales)[number]) || !["image/png", "image/jpeg"].includes(format))
+    throw new ToolError("number");
+  const doc = await pdfPreview(file);
+  try {
+    const pages = selection.trim()
+      ? parsePageSelection(selection, doc.numPages)
+      : Array.from({ length: doc.numPages }, (_, index) => index);
+    const extension = format === "image/png" ? "png" : "jpg";
+    const base = file.name.replace(/\.pdf$/i, "").replace(/[^\p{L}\p{N}._-]/gu, "_") || "pdf";
+    const entries: Record<string, Uint8Array> = {};
+    let total = 0;
+    for (const index of [...pages].sort((a, b) => a - b)) {
+      abortCheck(signal);
+      const canvas = await renderPdfPage(doc, index + 1, scale);
+      if (format === "image/jpeg") {
+        // JPEG has no transparency, so paint the page on white first.
+        const flat = document.createElement("canvas");
+        flat.width = canvas.width;
+        flat.height = canvas.height;
+        const context = flat.getContext("2d")!;
+        context.fillStyle = "#fff";
+        context.fillRect(0, 0, flat.width, flat.height);
+        context.drawImage(canvas, 0, 0);
+        entries[`${base}-page-${index + 1}.${extension}`] = new Uint8Array(await (await canvasBlob(flat, format, 0.92)).arrayBuffer());
+      } else {
+        entries[`${base}-page-${index + 1}.${extension}`] = new Uint8Array(await (await canvasBlob(canvas, format)).arrayBuffer());
+      }
+      total += Object.values(entries).at(-1)!.byteLength;
+      if (total > 100 * 1024 * 1024) throw new ToolError("size");
+      canvas.width = canvas.height = 0;
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+    const names = Object.keys(entries);
+    if (names.length === 1)
+      return { blob: new Blob([new Uint8Array(entries[names[0]])], { type: format }), filename: names[0] };
+    const bytes = await zipEntries(entries, signal);
+    return { blob: new Blob([bytes], { type: "application/zip" }), filename: `${base}-pages.zip` };
+  } finally {
+    await doc.destroy();
   }
 }

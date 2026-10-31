@@ -12,6 +12,8 @@ const ImageStudio = lazy(() => import("./ImageStudio"));
 const OcrTool = lazy(() => import("./OcrTool"));
 const ExtendedTextTools = lazy(() => import("./ExtendedTextTools"));
 const ThaiTools = lazy(() => import("./ThaiTools"));
+const PdfToImages = lazy(() => import("./PdfToImages"));
+const QrReader = lazy(() => import("./QrReader"));
 // Short calculations that are quick to retype, so leaving them needs no confirmation.
 const disposableInputTools = new Set<string>(["unit-converter", "baht-text", "buddhist-year", "withholding-tax"]);
 // Option controls are settings rather than work.
@@ -87,6 +89,10 @@ export default function ToolWorkspace({
           tool.id === "images-pdf" ||
           tool.id === "remove-background" ? (
           <ImageStudio mode={tool.id} />
+        ) : tool.id === "pdf-to-images" ? (
+          <PdfToImages />
+        ) : tool.id === "qr-reader" ? (
+          <QrReader />
         ) : tool.id === "ocr" ? (
           <OcrTool />
         ) : tool.id === "text-studio" || tool.id === "developer-tools" ? (
