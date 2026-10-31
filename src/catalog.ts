@@ -11,6 +11,9 @@ import {
   QrCode,
   ReceiptText,
   ScanText,
+  Banknote,
+  CalendarDays,
+  Percent,
 } from "lucide-react";
 import type { Language } from "@/shared/languageStore";
 
@@ -230,6 +233,36 @@ export const toolCatalog = [
     description: copy(
       "JSON formatting, URL and UTF-8 Base64 encoding.",
       "จัดรูปแบบ JSON และเข้ารหัส URL / Base64 UTF-8",
+    ),
+  },
+  {
+    id: "baht-text",
+    category: "convert",
+    icon: Banknote,
+    name: copy("Baht Text", "บาทเป็นตัวอักษร"),
+    description: copy(
+      "Write an amount in Thai words for cheques and invoices.",
+      "เขียนจำนวนเงินเป็นตัวอักษรไทย สำหรับเช็คและใบแจ้งหนี้",
+    ),
+  },
+  {
+    id: "buddhist-year",
+    category: "convert",
+    icon: CalendarDays,
+    name: copy("B.E. / C.E. Converter", "แปลงปี พ.ศ. / ค.ศ."),
+    description: copy(
+      "Convert Buddhist and Christian years and write dates in Thai.",
+      "แปลงปี พ.ศ. และ ค.ศ. พร้อมเขียนวันที่แบบไทย",
+    ),
+  },
+  {
+    id: "withholding-tax",
+    category: "calculate",
+    icon: Percent,
+    name: copy("Withholding Tax", "ภาษีหัก ณ ที่จ่าย"),
+    description: copy(
+      "Work out the tax to withhold, VAT and the amount to pay.",
+      "คำนวณภาษีที่ต้องหัก VAT และยอดที่ต้องโอนจ่าย",
     ),
   },
 ] as const;

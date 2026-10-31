@@ -47,6 +47,22 @@ export const messages: Record<string, { en: string; th: string }> = {
     en: "Enter a finite number within the allowed range.",
     th: "กรุณากรอกตัวเลขที่ถูกต้องและอยู่ในช่วงที่กำหนด",
   },
+  baht: {
+    en: "Enter an amount up to 999,999,999,999.99 with at most two decimals.",
+    th: "กรอกจำนวนเงินไม่เกิน 999,999,999,999.99 บาท และมีทศนิยมไม่เกิน 2 ตำแหน่ง",
+  },
+  year: {
+    en: "Enter a whole year: 1 to 9999 for C.E., or 544 to 10542 for B.E.",
+    th: "กรอกปีเป็นจำนวนเต็ม ค.ศ. 1–9999 หรือ พ.ศ. 544–10542",
+  },
+  date: {
+    en: "Choose a real date from 1 January 1941 (B.E. 2484) onward.",
+    th: "เลือกวันที่ที่มีอยู่จริง ตั้งแต่ 1 มกราคม ค.ศ. 1941 (พ.ศ. 2484) เป็นต้นไป",
+  },
+  tax: {
+    en: "Enter an amount above 0 (up to 10,000,000,000 baht, two decimals) and a rate from 0 to 100.",
+    th: "กรอกจำนวนเงินมากกว่า 0 ไม่เกิน 10,000,000,000 บาท ทศนิยมไม่เกิน 2 ตำแหน่ง และอัตราภาษี 0–100",
+  },
   temperature: {
     en: "Temperature cannot be below absolute zero.",
     th: "อุณหภูมิต้องไม่ต่ำกว่าศูนย์สัมบูรณ์",

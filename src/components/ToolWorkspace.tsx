@@ -11,6 +11,9 @@ const PdfStudio = lazy(() => import("./PdfStudio"));
 const ImageStudio = lazy(() => import("./ImageStudio"));
 const OcrTool = lazy(() => import("./OcrTool"));
 const ExtendedTextTools = lazy(() => import("./ExtendedTextTools"));
+const ThaiTools = lazy(() => import("./ThaiTools"));
+// Short calculations that are quick to retype, so leaving them needs no confirmation.
+const disposableInputTools = new Set<string>(["unit-converter", "baht-text", "buddhist-year", "withholding-tax"]);
 // Option controls are settings rather than work.
 const holdsWork = (field: Element) =>
   field.matches("textarea, input:not([type=checkbox], [type=radio], [type=range], [type=color])");
@@ -34,9 +37,8 @@ export default function ToolWorkspace({
     };
   }, []);
   const group = categories.find((item) => item.id === tool.category)!;
-  const hasDisposableInput = tool.id === "unit-converter";
   const trackEdit = (event: SyntheticEvent) => {
-    if (!hasDisposableInput && holdsWork(event.target as Element)) onEdit();
+    if (!disposableInputTools.has(tool.id) && holdsWork(event.target as Element)) onEdit();
   };
   return (
     <div
@@ -91,6 +93,10 @@ export default function ToolWorkspace({
           <ExtendedTextTools developer={tool.id === "developer-tools"} />
         ) : tool.id === "invoice" ? (
           <InvoiceTool />
+        ) : tool.id === "baht-text" ||
+          tool.id === "buddhist-year" ||
+          tool.id === "withholding-tax" ? (
+          <ThaiTools mode={tool.id} />
         ) : tool.id === "unit-converter" || tool.id === "word-counter" ? (
           <TextTools mode={tool.id} />
         ) : (
