@@ -500,8 +500,8 @@ export default function ToolsApp() {
                 [
                   text("Are there file limits?", "มีข้อจำกัดของไฟล์หรือไม่?"),
                   text(
-                    "Merge/split: 50 MB, 500 pages. PDF page editing: 100 pages. OCR: 20 MB, 10 PDF pages. Images: JPEG, PNG or WebP up to 20 MB and 24 megapixels; batch tools up to 20 files, 50 MB total. Protected PDFs are not supported. Image output is a still image.",
-                    "รวม/แยก PDF: 50 MB, 500 หน้า จัดการหน้า PDF: 100 หน้า OCR: 20 MB, PDF 10 หน้า รูปภาพ JPEG/PNG/WebP ไฟล์ละ 20 MB, 24 ล้านพิกเซล งานเป็นชุดสูงสุด 20 ไฟล์รวม 50 MB ไม่รองรับ PDF ล็อกรหัส ภาพส่งออกเป็นภาพนิ่ง",
+                    "Merge/split: 50 MB, 500 pages. PDF page editing and PDF to images: 100 pages. OCR: 20 MB, 10 PDF pages. Images: JPEG, PNG or WebP up to 20 MB and 24 megapixels; batch tools up to 20 files, 50 MB total. Protected PDFs are not supported. Image output is a still image.",
+                    "รวม/แยก PDF: 50 MB, 500 หน้า จัดการหน้า PDF และ PDF เป็นรูปภาพ: 100 หน้า OCR: 20 MB, PDF 10 หน้า รูปภาพ JPEG/PNG/WebP ไฟล์ละ 20 MB, 24 ล้านพิกเซล งานเป็นชุดสูงสุด 20 ไฟล์รวม 50 MB ไม่รองรับ PDF ล็อกรหัส ภาพส่งออกเป็นภาพนิ่ง",
                   ),
                 ],
               ].map(([question, answer]) => (

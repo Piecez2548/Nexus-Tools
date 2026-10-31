@@ -11,11 +11,11 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 - **Live demo:** [nexus-tools-chi.vercel.app](https://nexus-tools-chi.vercel.app/)
 - **Source code:** [github.com/Piecez2548/Nexus-Tools](https://github.com/Piecez2548/Nexus-Tools)
 - **โปรเจกต์ Vercel:** `nexus-tools` แยกจากโปรเจกต์ `nexus`
-- **อัปเดตเอกสาร:** 13 กันยายน 2026
+- **อัปเดตเอกสาร:** 31 ตุลาคม 2026
 
 ## Capabilities
 
-- 17 tools with lazy-loaded workspaces to keep the initial interface lightweight
+- 22 tools, each with its own address (for example `/withholding-tax`), page title, share preview and structured data, with lazy-loaded workspaces to keep the initial interface lightweight
 - Direct A4 PDF generation for quotations, invoices, and receipts with Thai text, watermarks, logos, signatures, tax, and PromptPay QR
 - Browser-local PDF/image/OCR processing with explicit limits, validation, recoverable errors, and no upload for ordinary tools
 - Supabase authentication with email verification and MFA enforcement, plus a nonce-bound cross-origin session handoff from Nexus
@@ -24,7 +24,7 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 
 ## Tech stack
 
-`React 19` · `TypeScript` · `Vite` · `Zustand` · `Supabase Auth` · `Vercel Functions/Blob` · `pdf-lib` · `PDF.js` · `Tesseract.js` · `Playwright` · `Vitest`
+`React 19` · `TypeScript` · `Vite` · `Zustand` · `Supabase Auth` · `Vercel Functions/Blob` · `pdf-lib` · `PDF.js` · `Tesseract.js` · `jsQR` · `fflate` · `Playwright` · `Vitest`
 
 > This repository is published for portfolio review. No open-source license is granted; all rights are reserved by the author.
 
@@ -32,9 +32,15 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 
 > เครื่องมือทั่วไปประมวลผลไฟล์ในเบราว์เซอร์ ส่วน **อัปโหลดสื่อ Nexus** และ **ซิงก์ข้อมูลธุรกิจ** จะส่งข้อมูลไป private Vercel Blob เมื่อผู้ใช้ยืนยัน เลือกสิทธิ์สื่อและวันหมดอายุก่อนแชร์ ข้อมูลคลาวด์ไม่ได้เข้ารหัสแบบ end-to-end
 
+## Screenshots
+
+| หน้าหลัก | ภาษีหัก ณ ที่จ่าย | มือถือ |
+| --- | --- | --- |
+| ![หน้าหลัก](docs/screenshots/home.png) | ![ภาษีหัก ณ ที่จ่าย](docs/screenshots/withholding-tax.png) | ![มือถือ](docs/screenshots/mobile.png) |
+
 ## Available capabilities
 
-รายการในหน้าเว็บมี 17 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
+รายการในหน้าเว็บมี 22 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
 
 | เครื่องมือ | การทำงาน | ข้อจำกัดหลัก |
 | --- | --- | --- |
@@ -55,6 +61,11 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 | OCR อ่านไทยและอังกฤษ | อ่านรูป/PDF สแกน พร้อมเทียบต้นฉบับและแก้ข้อความ | ไม่เกิน 20 MB / PDF 10 หน้า; ต้องตรวจทานผลลัพธ์ |
 | จัดการข้อความ | เปลี่ยนตัวพิมพ์ จัดช่องว่าง ลบบรรทัดซ้ำ และเทียบข้อความ | ไม่เกิน 100,000 UTF-16 units; เทียบบรรทัดตามตำแหน่ง |
 | เครื่องมือนักพัฒนา | จัดรูปแบบ JSON และแปลง URL/Base64 UTF-8 | ไม่เกิน 100,000 UTF-16 units; JSON ใช้ความแม่นยำตัวเลขของ JavaScript |
+| PDF เป็นรูปภาพ | แปลงหน้า PDF เป็น PNG/JPEG เลือกหน้าและความละเอียด 1–3 เท่า; หลายหน้าได้ ZIP | 1 ไฟล์ ไม่เกิน 50 MB / 100 หน้า; ไม่รองรับ PDF ล็อกรหัส; ผลลัพธ์รวมไม่เกิน 100 MB |
+| อ่าน QR Code จากรูป | อ่านข้อความใน QR ที่อยู่ในรูป คัดลอกได้ และเปิดลิงก์เฉพาะ http/https | JPEG/PNG/WebP ไม่เกิน 20 MB; อ่านในเบราว์เซอร์ ไม่อัปโหลดรูป |
+| บาทเป็นตัวอักษร | เขียนจำนวนเงินเป็นคำอ่านภาษาไทยสำหรับเช็คและใบแจ้งหนี้ | ไม่เกิน 999,999,999,999.99 บาท ทศนิยมไม่เกิน 2 ตำแหน่ง |
+| แปลงปี พ.ศ. / ค.ศ. | แปลงปีสองระบบและเขียนวันที่แบบไทย พร้อมวันในสัปดาห์ | วันที่ตั้งแต่ 1 มกราคม 1941 (พ.ศ. 2484) ซึ่งเป็นปีที่ไทยเริ่มปีใหม่วันที่ 1 มกราคม |
+| ภาษีหัก ณ ที่จ่าย | คำนวณภาษีที่ต้องหัก VAT และยอดโอนจ่าย (ไม่มี VAT / แยก VAT / รวม VAT) | คำนวณเป็นสตางค์ด้วยจำนวนเต็ม ปัดครึ่งขึ้น; ไม่ใช่คำแนะนำด้านภาษี |
 
 ไฟล์ PDF ที่มีรหัสผ่านหรือการป้องกันจะถูกปฏิเสธ การส่งออก PDF ไม่รับประกันการคงบุ๊กมาร์ก ลายเซ็นดิจิทัล หรือฟอร์มโต้ตอบ ส่วนรูปภาพที่แปลงแล้วไม่คงภาพเคลื่อนไหว/metadata และขนาดไฟล์อาจไม่เล็กลงเสมอไป
 
