@@ -14,6 +14,8 @@ import {
   Banknote,
   CalendarDays,
   Percent,
+  FileImage,
+  ScanQrCode,
 } from "lucide-react";
 import type { Language } from "@/shared/languageStore";
 
@@ -263,6 +265,26 @@ export const toolCatalog = [
     description: copy(
       "Work out the tax to withhold, VAT and the amount to pay.",
       "คำนวณภาษีที่ต้องหัก VAT และยอดที่ต้องโอนจ่าย",
+    ),
+  },
+  {
+    id: "pdf-to-images",
+    category: "pdf",
+    icon: FileImage,
+    name: copy("PDF to Images", "PDF เป็นรูปภาพ"),
+    description: copy(
+      "Save PDF pages as PNG or JPEG images.",
+      "บันทึกหน้า PDF เป็นรูป PNG หรือ JPEG",
+    ),
+  },
+  {
+    id: "qr-reader",
+    category: "convert",
+    icon: ScanQrCode,
+    name: copy("QR Code Reader", "อ่าน QR Code จากรูป"),
+    description: copy(
+      "Read the text or link inside a QR code image.",
+      "อ่านข้อความหรือลิงก์จากรูป QR Code",
     ),
   },
 ] as const;

@@ -9,7 +9,7 @@ for (const theme of ["dark", "light", "mono"]) {
     await page.setViewportSize({ width: 390, height: 900 });
     await page.addInitScript(theme => localStorage.setItem("nexus-tools-preferences", JSON.stringify({ state: { theme }, version: 0 })), theme);
     await page.goto("/");
-    await expect(page.locator(".tool-card")).toHaveCount(20);
+    await expect(page.locator(".tool-card")).toHaveCount(22);
     await page.addScriptTag({ content: axe });
     const violations = await page.evaluate(async () => {
       const engine = (window as unknown as { axe: { run: (options: object) => Promise<{ violations: { id: string; nodes: { target: string[]; failureSummary: string }[] }[] }> } }).axe;
