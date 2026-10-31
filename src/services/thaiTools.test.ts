@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bahtText, convertYear, describeDate, formatSatang, withholdingTax } from "./thaiTools";
+import { bahtText, checkThaiId, convertYear, describeDate, formatSatang, vatBreakdown, withholdingTax } from "./thaiTools";
 
 describe("baht text", () => {
   it.each([
@@ -119,5 +119,37 @@ describe("withholding tax", () => {
     ["100", "abc"],
   ])("rejects amount %j with rate %j", (amount, rate) => {
     expect(() => withholdingTax(amount, "none", rate)).toThrow("tax");
+  });
+});
+
+describe("VAT", () => {
+  const text = (result: ReturnType<typeof vatBreakdown>) => Object.fromEntries(Object.entries(result).map(([key, value]) => [key, formatSatang(value)]));
+  it("adds 7% to a price before VAT", () => {
+    expect(text(vatBreakdown("1,000", "add"))).toEqual({ base: "1,000.00", vat: "70.00", total: "1,070.00" });
+    expect(text(vatBreakdown("0.07", "add"))).toEqual({ base: "0.07", vat: "0.00", total: "0.07" });
+    expect(text(vatBreakdown("0.08", "add"))).toEqual({ base: "0.08", vat: "0.01", total: "0.09" });
+  });
+  it("takes 7% out of a price that includes VAT", () => {
+    expect(text(vatBreakdown("1070", "extract"))).toEqual({ base: "1,000.00", vat: "70.00", total: "1,070.00" });
+    const odd = vatBreakdown("100", "extract");
+    expect([odd.base, odd.vat]).toEqual([9346n, 654n]);
+    expect(odd.base + odd.vat).toBe(10000n);
+  });
+  it.each(["", "0", "-5", "1.234", "abc", "10000000001"])("rejects %j", (input) => {
+    expect(() => vatBreakdown(input, "add")).toThrow("vat");
+  });
+});
+
+describe("Thai national ID", () => {
+  it("accepts numbers with a correct check digit, in any spacing", () => {
+    expect(checkThaiId("1101700230678")).toMatchObject({ valid: true, formatted: "1-1017-00230-67-8" });
+    expect(checkThaiId("1-1017-00230-67-8").valid).toBe(true);
+    expect(checkThaiId(" 1101700230678 ").valid).toBe(true);
+  });
+  it("reports a wrong check digit and the expected one", () => {
+    expect(checkThaiId("1101700230673")).toMatchObject({ valid: false, expected: 8 });
+  });
+  it.each(["", "123", "11017002306781", "11017002306a3", "1.101700230673"])("rejects %j", (input) => {
+    expect(() => checkThaiId(input)).toThrow("nationalid");
   });
 });

@@ -16,6 +16,9 @@ import {
   Percent,
   FileImage,
   ScanQrCode,
+  BadgePercent,
+  IdCard,
+  Smartphone,
 } from "lucide-react";
 import type { Language } from "@/shared/languageStore";
 
@@ -285,6 +288,36 @@ export const toolCatalog = [
     description: copy(
       "Read the text or link inside a QR code image.",
       "อ่านข้อความหรือลิงก์จากรูป QR Code",
+    ),
+  },
+  {
+    id: "vat-calculator",
+    category: "calculate",
+    icon: BadgePercent,
+    name: copy("VAT 7% Calculator", "คำนวณ VAT 7%"),
+    description: copy(
+      "Add VAT to a price, or take it out of a VAT-inclusive price.",
+      "บวก VAT เข้ากับราคา หรือแยก VAT ออกจากราคารวม",
+    ),
+  },
+  {
+    id: "thai-id",
+    category: "professional",
+    icon: IdCard,
+    name: copy("Thai ID Number Check", "ตรวจเลขบัตรประชาชน"),
+    description: copy(
+      "Check the format and check digit of a 13-digit Thai ID number.",
+      "ตรวจรูปแบบและเลขตรวจสอบของเลขบัตรประชาชน 13 หลัก",
+    ),
+  },
+  {
+    id: "promptpay-qr",
+    category: "convert",
+    icon: Smartphone,
+    name: copy("PromptPay QR", "สร้าง QR พร้อมเพย์"),
+    description: copy(
+      "Make a PromptPay QR for a mobile number and an amount.",
+      "สร้าง QR พร้อมเพย์จากเบอร์มือถือและจำนวนเงิน",
     ),
   },
 ] as const;

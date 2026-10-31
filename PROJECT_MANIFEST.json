@@ -1,6 +1,10 @@
 {
   "project": "Nexus Tools",
-  "source": { "local": null, "github": null, "production": "https://nexus-tools-chi.vercel.app/" },
-  "status": "blocked-source-not-present",
-  "next": "Locate the canonical source repository, then extract and validate it independently."
+  "source": {
+    "github": "https://github.com/Piecez2548/Nexus-Tools",
+    "production": "https://nexus-tools-chi.vercel.app/"
+  },
+  "status": "active",
+  "tools": 25,
+  "readme": "README.md"
 }

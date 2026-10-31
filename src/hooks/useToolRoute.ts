@@ -10,18 +10,20 @@ export function useToolRoute(toolTitle: (tool: Tool) => string, leaveMessage: st
   const activeRef = useRef(activeTool);
   activeRef.current = activeTool;
   const dirty = useRef(false);
-  const markDirty = useCallback(() => { dirty.current = true; }, []);
+  const setDirty = useCallback((value: boolean) => { dirty.current = value; }, []);
 
   const openTool = useCallback((tool: Tool) => {
     dirty.current = false;
     history.pushState(null, "", toolPath(tool.id));
     setActiveTool(tool);
   }, []);
+  // Closing with the X button, Esc or a click outside asks the same question as Back.
   const closeTool = useCallback(() => {
+    if (dirty.current && !window.confirm(leaveMessage)) return;
     dirty.current = false;
     history.pushState(null, "", "/");
     setActiveTool(null);
-  }, []);
+  }, [leaveMessage]);
 
   useEffect(() => {
     const onPopState = () => {
@@ -54,5 +56,5 @@ export function useToolRoute(toolTitle: (tool: Tool) => string, leaveMessage: st
     document.title = activeTool ? `${toolTitle(activeTool)} | Nexus Tools` : homeTitle;
   }, [activeTool, toolTitle]);
 
-  return { activeTool, openTool, closeTool, markDirty };
+  return { activeTool, openTool, closeTool, setDirty };
 }

@@ -112,3 +112,34 @@ test("the close button returns to the home address", async ({ page }) => {
   await expect(page).toHaveURL(/\/$/);
   await expect(page).toHaveTitle("Nexus Tools — Your everyday toolkit");
 });
+
+test("closing with the X button or Esc asks before discarding work", async ({ page }) => {
+  await openWordCounter(page);
+  const dialog = page.getByRole("dialog");
+  const input = dialog.getByRole("textbox").first();
+  await input.fill("งานที่ยังไม่บันทึก");
+  page.once("dialog", (prompt) => prompt.dismiss());
+  await dialog.getByRole("button", { name: /Close tool|ปิดเครื่องมือ/ }).click();
+  await expect(dialog).toBeVisible();
+  await expect(input).toHaveValue("งานที่ยังไม่บันทึก");
+  page.once("dialog", (prompt) => prompt.dismiss());
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeVisible();
+  page.once("dialog", (prompt) => prompt.accept());
+  await dialog.getByRole("button", { name: /Close tool|ปิดเครื่องมือ/ }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test("a field that was typed in and cleared again leaves no unsaved work", async ({ page }) => {
+  await openWordCounter(page);
+  const dialog = page.getByRole("dialog");
+  const input = dialog.getByRole("textbox").first();
+  await input.fill("ลองพิมพ์");
+  await input.fill("");
+  page.on("dialog", () => {
+    throw new Error("Nothing is left to lose, so closing should not ask");
+  });
+  await dialog.getByRole("button", { name: /Close tool|ปิดเครื่องมือ/ }).click();
+  await expect(dialog).toBeHidden();
+});

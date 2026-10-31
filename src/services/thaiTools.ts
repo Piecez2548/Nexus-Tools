@@ -97,11 +97,12 @@ export type VatMode = "none" | "separate" | "included";
 const vatPercent = 7n;
 const maxSatang = 10_000_000_000_00n;
 
-function parseMoney(raw: string) {
+/** Reads an amount above zero with at most two decimals, in satang. */
+export function parseMoney(raw: string, code = "tax") {
   const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(raw.trim().replace(/,/g, ""));
-  if (!match) throw new ToolError("tax");
+  if (!match) throw new ToolError(code);
   const satang = BigInt(match[1]) * 100n + BigInt((match[2] ?? "").padEnd(2, "0") || "0");
-  if (satang <= 0n || satang > maxSatang) throw new ToolError("tax");
+  if (satang <= 0n || satang > maxSatang) throw new ToolError(code);
   return satang;
 }
 // Rounds half up for non-negative values.
@@ -128,4 +129,28 @@ export function withholdingTax(rawAmount: string, vat: VatMode, rawRate: string)
 
 export function formatSatang(satang: bigint) {
   return `${(satang / 100n).toLocaleString("en-US")}.${String(satang % 100n).padStart(2, "0")}`;
+}
+
+export type VatDirection = "add" | "extract";
+
+/** VAT at 7%: `add` treats the amount as the price before VAT, `extract` as the price including it. */
+export function vatBreakdown(rawAmount: string, direction: VatDirection) {
+  const entered = parseMoney(rawAmount, "vat");
+  const base = direction === "add" ? entered : roundedDivide(entered * 100n, 100n + vatPercent);
+  const vat = direction === "add" ? roundedDivide(entered * vatPercent, 100n) : entered - base;
+  return { base, vat, total: base + vat };
+}
+
+/** Checks the format and check digit of a Thai national ID number. It cannot tell whether the number is issued. */
+export function checkThaiId(raw: string) {
+  const digits = raw.replace(/[\s-]/g, "");
+  if (!/^\d{13}$/.test(digits)) throw new ToolError("nationalid");
+  let sum = 0;
+  for (let index = 0; index < 12; index++) sum += Number(digits[index]) * (13 - index);
+  const expected = (11 - (sum % 11)) % 10;
+  return {
+    valid: expected === Number(digits[12]),
+    expected,
+    formatted: `${digits[0]}-${digits.slice(1, 5)}-${digits.slice(5, 10)}-${digits.slice(10, 12)}-${digits[12]}`,
+  };
 }
