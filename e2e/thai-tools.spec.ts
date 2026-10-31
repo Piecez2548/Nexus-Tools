@@ -138,3 +138,73 @@ test("income tax splits net income across the progressive bands", async ({ page 
   await dialog.getByLabel("Net income for the year (baht)").fill("-1");
   await expect(dialog.getByRole("alert")).toContainText("net income above 0");
 });
+
+test("loan calculator: reducing balance, flat rate and the schedule", async ({ page }) => {
+  await page.goto("/loan-calculator");
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Loan amount (baht)").fill("1,000,000");
+  await dialog.getByLabel("Interest rate (% per year)").fill("6");
+  await dialog.getByLabel("Number of months").fill("360");
+  await expect(dialog.locator("dd", { hasText: /^5,995\.51$/ })).toBeVisible();
+  await dialog.getByText("Payment schedule (360 months)").click();
+  const table = dialog.getByRole("table");
+  await expect(table.getByRole("row")).toHaveCount(361);
+  await expect(table.getByRole("row").nth(1)).toContainText("5,000.00");
+  await expect(table.getByRole("row").last()).toContainText("0.00");
+
+  await dialog.getByLabel("Loan amount (baht)").fill("500000");
+  await dialog.getByLabel("Interest rate (% per year)").fill("3");
+  await dialog.getByLabel("Number of months").fill("60");
+  await dialog.getByLabel("How interest is charged").selectOption("flat");
+  await expect(dialog.locator("dd", { hasText: /^9,583\.33$/ })).toBeVisible();
+  await expect(dialog.getByText("Real yearly rate (EIR)")).toBeVisible();
+  await expect(dialog.locator("dd", { hasText: /^5\.[3-6]\d%$/ })).toBeVisible();
+  await dialog.getByLabel("Number of months").fill("0");
+  await expect(dialog.getByRole("alert")).toContainText("1 to 600 months");
+});
+
+test("age and date difference counts years, months, days and the next birthday", async ({ page }) => {
+  await page.goto("/date-calculator");
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("From (or date of birth)").fill("1990-05-20");
+  await dialog.getByLabel("To (today by default)").fill("2026-10-31");
+  await expect(dialog.getByText("36 years 5 months 11 days")).toBeVisible();
+  await expect(dialog.getByText("13,313", { exact: true })).toBeVisible();
+  await expect(dialog.getByText("In 201 days, turning 37")).toBeVisible();
+  await expect(dialog.getByText("วันเสาร์ที่ 31 ตุลาคม พ.ศ. 2569")).toBeVisible();
+  await dialog.getByLabel("To (today by default)").fill("1990-01-01");
+  await expect(dialog.getByRole("alert")).toContainText("same as or after");
+});
+
+test("Thai and Arabic digits convert live and copy", async ({ page, context, browserName }) => {
+  if (browserName === "chromium") await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/thai-digits");
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Text").fill("วันที่ 31 ตุลาคม 2569");
+  await expect(dialog.getByText("วันที่ ๓๑ ตุลาคม ๒๕๖๙")).toBeVisible();
+  await dialog.getByLabel("Text").fill("เลขที่ ๑๒๓/๔๕");
+  await expect(dialog.getByText("เลขที่ 123/45")).toBeVisible();
+  if (browserName === "chromium") {
+    await dialog.getByRole("button", { name: "Copy Arabic digits" }).click();
+    await expect(dialog.getByRole("button", { name: "Copied" })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("เลขที่ 123/45");
+  }
+});
+
+test("password generator follows the chosen options", async ({ page }) => {
+  await page.goto("/password-generator");
+  const dialog = page.getByRole("dialog");
+  const password = dialog.getByTestId("password");
+  await expect(password).toHaveText(/^.{16}$/);
+  await dialog.getByLabel("Symbols (!@#$%…)").uncheck();
+  await dialog.getByLabel("Uppercase (A-Z)").uncheck();
+  await dialog.getByLabel("Avoid look-alikes (0 O 1 l I |)").check();
+  await expect(password).toHaveText(/^[a-km-z2-9]{16}$/);
+  await dialog.getByLabel("Length: 16").fill("40");
+  await expect(password).toHaveText(/^[a-km-z2-9]{40}$/);
+  const first = await password.innerText();
+  await dialog.getByRole("button", { name: "Make another" }).click();
+  expect(await password.innerText()).not.toBe(first);
+  for (const name of ["Lowercase (a-z)", "Digits (0-9)"]) await dialog.getByLabel(name).uncheck();
+  await expect(dialog.getByRole("alert")).toContainText("at least one kind");
+});

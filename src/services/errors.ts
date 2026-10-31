@@ -79,6 +79,18 @@ export const messages: Record<string, { en: string; th: string }> = {
     en: "Enter net income above 0 (up to 10,000,000,000 baht) with at most two decimals.",
     th: "กรอกเงินได้สุทธิมากกว่า 0 ไม่เกิน 10,000,000,000 บาท และทศนิยมไม่เกิน 2 ตำแหน่ง",
   },
+  loan: {
+    en: "Enter an amount above 0, a rate from 0 to 100 (two decimals at most) and 1 to 600 months.",
+    th: "กรอกยอดเงินกู้มากกว่า 0 อัตราดอกเบี้ย 0–100 (ทศนิยมไม่เกิน 2 ตำแหน่ง) และจำนวนงวด 1–600 เดือน",
+  },
+  daterange: {
+    en: "The second date must be the same as or after the first.",
+    th: "วันที่ที่สองต้องเป็นวันเดียวกับหรือหลังวันที่แรก",
+  },
+  password: {
+    en: "Choose a length from 8 to 64 and at least one kind of character.",
+    th: "เลือกความยาว 8–64 ตัวอักษร และเลือกชนิดอักขระอย่างน้อยหนึ่งชนิด",
+  },
   nationalid: {
     en: "Enter all 13 digits. Spaces and dashes are fine.",
     th: "กรอกเลข 13 หลักให้ครบ ใส่ช่องว่างหรือขีดได้",

@@ -9,7 +9,7 @@ for (const theme of ["dark", "light", "mono"]) {
     await page.setViewportSize({ width: 390, height: 900 });
     await page.addInitScript(theme => localStorage.setItem("nexus-tools-preferences", JSON.stringify({ state: { theme }, version: 0 })), theme);
     await page.goto("/");
-    await expect(page.locator(".tool-card")).toHaveCount(28);
+    await expect(page.locator(".tool-card")).toHaveCount(32);
     await page.addScriptTag({ content: axe });
     const violations = await page.evaluate(async () => {
       const engine = (window as unknown as { axe: { run: (options: object) => Promise<{ violations: { id: string; nodes: { target: string[]; failureSummary: string }[] }[] }> } }).axe;
@@ -28,7 +28,7 @@ test(`every tool dialog passes the accessibility scan in the ${theme} theme`, as
   await page.setViewportSize({ width: 390, height: 900 });
   const sitemap = await (await request.get("/sitemap.xml")).text();
   const paths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => new URL(match[1]).pathname).filter(path => path !== "/");
-  expect(paths.length).toBe(28);
+  expect(paths.length).toBe(32);
   const found: Record<string, unknown> = {};
   for (const path of paths) {
     await page.goto(path);

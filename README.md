@@ -15,11 +15,11 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 
 ## At a glance (English)
 
-A portfolio project: 28 everyday tools for Thai and English users that run in the browser, so ordinary files never leave the device.
+A portfolio project: 32 everyday tools for Thai and English users that run in the browser, so ordinary files never leave the device.
 
 - **Document tools:** merge, split, reorder, rotate and watermark PDFs; PDF to images; PDF compressor; images to PDF; OCR for Thai and English; invoices, quotations and receipts as A4 PDFs with PromptPay QR.
 - **Image tools:** compress, convert, HEIC to JPG, crop, watermark, batch to ZIP, remove a solid background.
-- **Thai-specific tools:** baht amounts in Thai words, B.E./C.E. year and date converter, withholding tax, VAT 7%, personal income tax, national ID check digit, PromptPay QR.
+- **Thai-specific tools:** baht amounts in Thai words, B.E./C.E. year and date converter, withholding tax, VAT 7%, personal income tax, loan instalments (including the real rate behind a flat rate), age and date difference, Thai/Arabic digits, national ID check digit, PromptPay QR, password generator.
 - **Every tool has its own URL**, page title, share preview and structured data, so tools can be linked, reloaded and found by search engines. Back and Esc ask before discarding unsaved work.
 
 ### Engineering notes
@@ -33,7 +33,7 @@ A portfolio project: 28 everyday tools for Thai and English users that run in th
 
 ## Capabilities
 
-- 28 tools, each with its own address (for example `/withholding-tax`), page title, share preview and structured data, with lazy-loaded workspaces to keep the initial interface lightweight
+- 32 tools, each with its own address (for example `/withholding-tax`), page title, share preview and structured data, with lazy-loaded workspaces to keep the initial interface lightweight
 - Direct A4 PDF generation for quotations, invoices, and receipts with Thai text, watermarks, logos, signatures, tax, and PromptPay QR
 - Browser-local PDF/image/OCR processing with explicit limits, validation, recoverable errors, and no upload for ordinary tools
 - Supabase authentication with email verification and MFA enforcement, plus a nonce-bound cross-origin session handoff from Nexus
@@ -58,7 +58,7 @@ A portfolio project: 28 everyday tools for Thai and English users that run in th
 
 ## Available capabilities
 
-รายการในหน้าเว็บมี 28 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
+รายการในหน้าเว็บมี 32 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
 
 | เครื่องมือ | การทำงาน | ข้อจำกัดหลัก |
 | --- | --- | --- |
@@ -90,6 +90,10 @@ A portfolio project: 28 everyday tools for Thai and English users that run in th
 | คำนวณภาษีเงินได้บุคคลธรรมดา | คำนวณภาษีจากเงินได้สุทธิตามอัตราก้าวหน้า 0–35% แยกรายขั้น | ไม่คำนวณค่าลดหย่อน ภาษีขั้นต่ำ หรือภาษีที่ถูกหักไว้; ไม่ใช่คำแนะนำด้านภาษี |
 | บีบอัด PDF | แปลงทุกหน้าเป็นภาพ JPEG แล้วรวมเป็น PDF ใหม่ เลือกคุณภาพ 3 ระดับ | ข้อความจะเลือก/ค้นหาไม่ได้ ลิงก์และฟอร์มหาย; ไฟล์ข้อความล้วนอาจใหญ่ขึ้น; 100 หน้า / 50 MB |
 | แปลง HEIC เป็น JPG | แปลงภาพ HEIC/HEIF จาก iPhone เป็น JPG หลายไฟล์ได้ ZIP | ไฟล์ละไม่เกิน 30 MB / 24 ล้านพิกเซล; ภาพนิ่งหลักเท่านั้น ไม่คัดลอก EXIF |
+| คำนวณค่างวดผ่อนชำระ | ค่างวดสินเชื่อแบบลดต้นลดดอก และแบบ Flat rate พร้อมอัตราดอกเบี้ยที่แท้จริง (EIR) และตารางผ่อนทุกงวด | 1–600 งวด; คำนวณเป็นสตางค์ ปัดเศษที่งวดสุดท้าย; ไม่รวมค่าธรรมเนียมหรือประกัน |
+| คำนวณอายุและระยะห่างวันที่ | ปี เดือน วัน และจำนวนวันรวมระหว่างสองวันที่ พร้อมวันเกิดครั้งถัดไป | วันที่ตั้งแต่ 1 มกราคม ค.ศ. 1941; วันเกิด 29 ก.พ. นับเป็น 1 มี.ค. ในปีที่ไม่ใช่ปีอธิกสุรทิน |
+| แปลงเลขไทย ↔ เลขอารบิก | สลับ ๐-๙ กับ 0-9 ในข้อความ เปลี่ยนเฉพาะตัวเลข | ข้อความไม่เกิน 20,000 ตัวอักษร |
+| สร้างรหัสผ่านแบบสุ่ม | รหัสผ่าน 8–64 ตัวอักษร เลือกชนิดอักขระ เลี่ยงตัวที่ดูคล้ายกัน แสดงความแข็งแรงเป็นบิต | ใช้ตัวสุ่มของเบราว์เซอร์ (`crypto.getRandomValues`) ไม่ส่งหรือบันทึกที่ไหน |
 
 ไฟล์ PDF ที่มีรหัสผ่านหรือการป้องกันจะถูกปฏิเสธ การส่งออก PDF ไม่รับประกันการคงบุ๊กมาร์ก ลายเซ็นดิจิทัล หรือฟอร์มโต้ตอบ ส่วนรูปภาพที่แปลงแล้วไม่คงภาพเคลื่อนไหว/metadata และขนาดไฟล์อาจไม่เล็กลงเสมอไป
 
