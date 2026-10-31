@@ -18,7 +18,7 @@ test("catalogue, favorites, search, language and theme persist", async ({
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await expect(page.locator(".tool-card")).toHaveCount(22);
+  await expect(page.locator(".tool-card")).toHaveCount(25);
   await page
     .getByRole("button", { name: "Favorite Merge PDF", exact: true })
     .click();
@@ -142,6 +142,8 @@ test("QR generates SVG, clears stale results and traps keyboard focus", async ({
   await expect(
     page.getByRole("button", { name: "Generate file" }),
   ).toBeFocused();
+  // The edited text was never turned into a file, so closing asks first.
+  page.once("dialog", (dialog) => void dialog.accept());
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(

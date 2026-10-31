@@ -15,7 +15,7 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 
 ## Capabilities
 
-- 22 tools, each with its own address (for example `/withholding-tax`), page title, share preview and structured data, with lazy-loaded workspaces to keep the initial interface lightweight
+- 25 tools, each with its own address (for example `/withholding-tax`), page title, share preview and structured data, with lazy-loaded workspaces to keep the initial interface lightweight
 - Direct A4 PDF generation for quotations, invoices, and receipts with Thai text, watermarks, logos, signatures, tax, and PromptPay QR
 - Browser-local PDF/image/OCR processing with explicit limits, validation, recoverable errors, and no upload for ordinary tools
 - Supabase authentication with email verification and MFA enforcement, plus a nonce-bound cross-origin session handoff from Nexus
@@ -40,7 +40,7 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 
 ## Available capabilities
 
-รายการในหน้าเว็บมี 22 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
+รายการในหน้าเว็บมี 25 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
 
 | เครื่องมือ | การทำงาน | ข้อจำกัดหลัก |
 | --- | --- | --- |
@@ -66,6 +66,9 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 | บาทเป็นตัวอักษร | เขียนจำนวนเงินเป็นคำอ่านภาษาไทยสำหรับเช็คและใบแจ้งหนี้ | ไม่เกิน 999,999,999,999.99 บาท ทศนิยมไม่เกิน 2 ตำแหน่ง |
 | แปลงปี พ.ศ. / ค.ศ. | แปลงปีสองระบบและเขียนวันที่แบบไทย พร้อมวันในสัปดาห์ | วันที่ตั้งแต่ 1 มกราคม 1941 (พ.ศ. 2484) ซึ่งเป็นปีที่ไทยเริ่มปีใหม่วันที่ 1 มกราคม |
 | ภาษีหัก ณ ที่จ่าย | คำนวณภาษีที่ต้องหัก VAT และยอดโอนจ่าย (ไม่มี VAT / แยก VAT / รวม VAT) | คำนวณเป็นสตางค์ด้วยจำนวนเต็ม ปัดครึ่งขึ้น; ไม่ใช่คำแนะนำด้านภาษี |
+| คำนวณ VAT 7% | บวก VAT เข้ากับราคา หรือแยก VAT ออกจากราคารวม | คำนวณเป็นสตางค์ด้วยจำนวนเต็ม ปัดครึ่งขึ้น; ไม่ใช่คำแนะนำด้านภาษี |
+| ตรวจเลขบัตรประชาชน | ตรวจรูปแบบ 13 หลักและเลขตรวจสอบหลักสุดท้าย | ไม่ยืนยันว่าเลขถูกออกให้ใครจริงหรือไม่; ตรวจในเบราว์เซอร์ ไม่ส่งหรือบันทึกเลข |
+| สร้าง QR พร้อมเพย์ | สร้าง QR พร้อมเพย์จากเบอร์มือถือและจำนวนเงินคงที่ ดาวน์โหลดเป็น PNG | เบอร์มือถือเท่านั้น; ไม่ตรวจกับธนาคาร |
 
 ไฟล์ PDF ที่มีรหัสผ่านหรือการป้องกันจะถูกปฏิเสธ การส่งออก PDF ไม่รับประกันการคงบุ๊กมาร์ก ลายเซ็นดิจิทัล หรือฟอร์มโต้ตอบ ส่วนรูปภาพที่แปลงแล้วไม่คงภาพเคลื่อนไหว/metadata และขนาดไฟล์อาจไม่เล็กลงเสมอไป
 

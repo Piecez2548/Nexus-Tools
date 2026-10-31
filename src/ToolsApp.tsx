@@ -51,7 +51,7 @@ export default function ToolsApp() {
   const [sort, setSort] = useState("recommended");
   const [mobileOpen, setMobileOpen] = useState(false);
   const toolTitle = useCallback((tool: Tool) => tool.name[language], [language]);
-  const { activeTool, openTool, closeTool, markDirty } = useToolRoute(
+  const { activeTool, openTool, closeTool, setDirty } = useToolRoute(
     toolTitle,
     text(
       "Leave this tool? Your unsaved work will be lost.",
@@ -539,7 +539,7 @@ export default function ToolsApp() {
             <ToolWorkspace
               tool={activeTool}
               onClose={closeTool}
-              onEdit={markDirty}
+              onEdit={setDirty}
             />
           </Suspense>
         </ToolLoadBoundary>

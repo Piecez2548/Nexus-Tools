@@ -4,16 +4,19 @@ import { useLanguageStore } from "@/shared/languageStore";
 import { ToolError, messages } from "../services/errors";
 import {
   bahtText,
+  checkThaiId,
   convertYear,
   describeDate,
   formatSatang,
+  vatBreakdown,
   withholdingRates,
   withholdingTax,
+  type VatDirection,
   type VatMode,
   type YearDirection,
 } from "../services/thaiTools";
 
-type Mode = "baht-text" | "buddhist-year" | "withholding-tax";
+type Mode = "baht-text" | "buddhist-year" | "withholding-tax" | "vat-calculator" | "thai-id";
 
 function attempt<T>(calculate: () => T): { value: T | null; error: string } {
   try {
@@ -38,6 +41,8 @@ export default function ThaiTools({ mode }: { mode: Mode }) {
   );
   if (mode === "baht-text") return <BahtText t={t} failure={failure} />;
   if (mode === "buddhist-year") return <BuddhistYear t={t} failure={failure} />;
+  if (mode === "vat-calculator") return <VatCalculator t={t} failure={failure} />;
+  if (mode === "thai-id") return <ThaiIdCheck t={t} failure={failure} />;
   return <WithholdingTax t={t} failure={failure} language={language} />;
 }
 
@@ -270,6 +275,91 @@ function WithholdingTax({ t, failure, language }: Helpers & { language: "en" | "
         {t(
           "The payer files form P.N.D. 3 (individual recipient) or P.N.D. 53 (company recipient) within 7 days after the end of the month of payment.",
           "ผู้จ่ายยื่น ภ.ง.ด.3 (ผู้รับเป็นบุคคลธรรมดา) หรือ ภ.ง.ด.53 (ผู้รับเป็นนิติบุคคล) ภายใน 7 วันนับแต่สิ้นเดือนที่จ่ายเงิน",
+        )}
+      </p>
+    </div>
+  );
+}
+
+function VatCalculator({ t, failure }: Helpers) {
+  const [amount, setAmount] = useState("");
+  const [direction, setDirection] = useState<VatDirection>("add");
+  const result = amount.trim() ? attempt(() => vatBreakdown(amount, direction)) : null;
+  const figures = result?.value
+    ? ([
+        [t("Price before VAT", "ราคาก่อน VAT"), result.value.base],
+        [t("VAT 7%", "VAT 7%"), result.value.vat],
+        [t("Price including VAT", "ราคารวม VAT"), result.value.total],
+      ] as [string, bigint][])
+    : [];
+  return (
+    <div className="tool-fields">
+      <label className="field">
+        {t("Amount (baht)", "จำนวนเงิน (บาท)")}
+        <input inputMode="decimal" autoComplete="off" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="1,000" />
+      </label>
+      <label className="field">
+        {t("Calculate", "วิธีคำนวณ")}
+        <select value={direction} onChange={(event) => setDirection(event.target.value as VatDirection)}>
+          <option value="add">{t("Add VAT 7% to this price", "บวก VAT 7% เข้ากับราคานี้")}</option>
+          <option value="extract">{t("This price already includes VAT 7%", "ราคานี้รวม VAT 7% แล้ว (แยก VAT ออก)")}</option>
+        </select>
+      </label>
+      <div className="calculation-result" aria-live="polite">
+        {result?.error ? (
+          failure(result.error)
+        ) : figures.length ? (
+          <dl className="date-rows">
+            {figures.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{formatSatang(value)}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <span>{t("Enter an amount to see the VAT.", "กรอกจำนวนเงินเพื่อดู VAT")}</span>
+        )}
+      </div>
+      <p className="field-hint">
+        {t(
+          "Uses the 7% rate and rounds to the satang (half up). Some goods and services are zero-rated or exempt. This is a calculator, not tax advice.",
+          "ใช้อัตรา 7% และปัดเศษเป็นสตางค์แบบปัดขึ้นตั้งแต่ครึ่ง สินค้าและบริการบางประเภทเสียอัตรา 0% หรือได้รับยกเว้น เครื่องมือนี้ช่วยคำนวณ ไม่ใช่คำแนะนำด้านภาษี",
+        )}
+      </p>
+    </div>
+  );
+}
+
+function ThaiIdCheck({ t, failure }: Helpers) {
+  const [id, setId] = useState("");
+  const result = id.trim() ? attempt(() => checkThaiId(id)) : null;
+  return (
+    <div className="tool-fields">
+      <label className="field">
+        {t("National ID number (13 digits)", "เลขบัตรประชาชน (13 หลัก)")}
+        <input inputMode="numeric" autoComplete="off" maxLength={17} value={id} onChange={(event) => setId(event.target.value)} placeholder="1-2345-67890-12-3" />
+      </label>
+      <div className="calculation-result" aria-live="polite">
+        {result?.error ? (
+          failure(result.error)
+        ) : result?.value ? (
+          <>
+            <span>{result.value.formatted}</span>
+            <strong>
+              {result.value.valid
+                ? t("The check digit is correct", "เลขตรวจสอบ (หลักที่ 13) ถูกต้อง")
+                : t(`The check digit is wrong; it should be ${result.value.expected}`, `เลขตรวจสอบไม่ถูกต้อง ควรเป็น ${result.value.expected}`)}
+            </strong>
+          </>
+        ) : (
+          <span>{t("Enter the 13 digits to check them.", "กรอกเลข 13 หลักเพื่อตรวจสอบ")}</span>
+        )}
+      </div>
+      <p className="field-hint">
+        {t(
+          "This only checks the format and the last (check) digit. It cannot tell whether the number was issued or who it belongs to. The number is checked in your browser and is not sent or saved anywhere.",
+          "ตรวจเฉพาะรูปแบบและเลขตรวจสอบหลักสุดท้าย ไม่สามารถบอกได้ว่าเลขนี้ถูกออกให้ใครจริงหรือไม่ เลขถูกตรวจในเบราว์เซอร์ ไม่ถูกส่งหรือบันทึกที่ไหน",
         )}
       </p>
     </div>

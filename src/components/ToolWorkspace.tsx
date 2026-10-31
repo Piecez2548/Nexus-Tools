@@ -14,8 +14,9 @@ const ExtendedTextTools = lazy(() => import("./ExtendedTextTools"));
 const ThaiTools = lazy(() => import("./ThaiTools"));
 const PdfToImages = lazy(() => import("./PdfToImages"));
 const QrReader = lazy(() => import("./QrReader"));
+const PromptPayQr = lazy(() => import("./PromptPayQr"));
 // Short calculations that are quick to retype, so leaving them needs no confirmation.
-const disposableInputTools = new Set<string>(["unit-converter", "baht-text", "buddhist-year", "withholding-tax"]);
+const disposableInputTools = new Set<string>(["unit-converter", "baht-text", "buddhist-year", "withholding-tax", "vat-calculator", "thai-id", "promptpay-qr"]);
 // Option controls are settings rather than work.
 const holdsWork = (field: Element) =>
   field.matches("textarea, input:not([type=checkbox], [type=radio], [type=range], [type=color])");
@@ -26,7 +27,7 @@ export default function ToolWorkspace({
 }: {
   tool: Tool;
   onClose: () => void;
-  onEdit: () => void;
+  onEdit: (dirty: boolean) => void;
 }) {
   const { language } = useLanguageStore();
   const panel = useRef<HTMLElement>(null);
@@ -39,8 +40,20 @@ export default function ToolWorkspace({
     };
   }, []);
   const group = categories.find((item) => item.id === tool.category)!;
+  // Fields that currently hold typed text, plus whether a file was ever added.
+  const filled = useRef(new Set<Element>());
+  const fileAdded = useRef(false);
+  const report = () => onEdit(fileAdded.current || filled.current.size > 0);
   const trackEdit = (event: SyntheticEvent) => {
-    if (!disposableInputTools.has(tool.id) && holdsWork(event.target as Element)) onEdit();
+    if (disposableInputTools.has(tool.id)) return;
+    const field = event.target as HTMLInputElement | HTMLTextAreaElement;
+    if (field.matches("input[type=file]")) fileAdded.current = true;
+    else if (holdsWork(field)) {
+      // Clearing a field again leaves nothing to lose.
+      if (field.value) filled.current.add(field);
+      else filled.current.delete(field);
+    } else return;
+    report();
   };
   return (
     <div
@@ -53,7 +66,10 @@ export default function ToolWorkspace({
         ref={panel}
         onInputCapture={trackEdit}
         onChangeCapture={trackEdit}
-        onDropCapture={onEdit}
+        onDropCapture={() => {
+          fileAdded.current = true;
+          report();
+        }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="workspace-title"
@@ -101,8 +117,12 @@ export default function ToolWorkspace({
           <InvoiceTool />
         ) : tool.id === "baht-text" ||
           tool.id === "buddhist-year" ||
-          tool.id === "withholding-tax" ? (
+          tool.id === "withholding-tax" ||
+          tool.id === "vat-calculator" ||
+          tool.id === "thai-id" ? (
           <ThaiTools mode={tool.id} />
+        ) : tool.id === "promptpay-qr" ? (
+          <PromptPayQr />
         ) : tool.id === "unit-converter" || tool.id === "word-counter" ? (
           <TextTools mode={tool.id} />
         ) : (

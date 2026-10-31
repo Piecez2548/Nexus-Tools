@@ -67,6 +67,14 @@ export const messages: Record<string, { en: string; th: string }> = {
     en: "Enter an amount above 0 (up to 10,000,000,000 baht, two decimals) and a rate from 0 to 100.",
     th: "กรอกจำนวนเงินมากกว่า 0 ไม่เกิน 10,000,000,000 บาท ทศนิยมไม่เกิน 2 ตำแหน่ง และอัตราภาษี 0–100",
   },
+  vat: {
+    en: "Enter an amount above 0 (up to 10,000,000,000 baht) with at most two decimals.",
+    th: "กรอกจำนวนเงินมากกว่า 0 ไม่เกิน 10,000,000,000 บาท และทศนิยมไม่เกิน 2 ตำแหน่ง",
+  },
+  nationalid: {
+    en: "Enter all 13 digits. Spaces and dashes are fine.",
+    th: "กรอกเลข 13 หลักให้ครบ ใส่ช่องว่างหรือขีดได้",
+  },
   temperature: {
     en: "Temperature cannot be below absolute zero.",
     th: "อุณหภูมิต้องไม่ต่ำกว่าศูนย์สัมบูรณ์",

@@ -4,6 +4,8 @@ import { PDFDocument } from "pdf-lib";
 import { readFile } from "node:fs/promises";
 import { unzipSync } from "fflate";
 test.beforeEach(async ({ page }) => {
+  // These tests close tools that still hold typed text; the leave warning is covered in routes.spec.
+  page.on("dialog", (dialog) => void dialog.accept());
   await page.addInitScript(() =>
     localStorage.setItem(
       "nexus-language",
