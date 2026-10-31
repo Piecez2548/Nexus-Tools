@@ -7,7 +7,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useLanguageStore } from "@/shared/languageStore";
 import { invoiceTotals, type InvoiceItem } from "../services/calculations";
 import { createInvoicePdf } from "../services/invoicePdf";
-import { downloadFile } from "@/shared/download";
+import { downloadFile, markWorkSaved } from "@/shared/download";
 import { useToolRunner } from "../hooks/useToolRunner";
 import ResultPanel from "./ResultPanel";
 import { readDraft, saveLocal, removeLocal } from "../services/localData";
@@ -108,6 +108,7 @@ export default function InvoiceTool() {
               watermark,
               ...details,
                 });
+                if (ok) markWorkSaved();
                 setDraftMessage(
                   ok
                     ? t(

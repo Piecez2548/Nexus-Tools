@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 async function open(page: Page, name: string) {
-  await page.getByRole("button", { name: `Open ${name}`, exact: true }).click();
+  await page.getByRole("link", { name: `Open ${name}`, exact: true }).click();
 }
 async function download(page: Page) {
   const pending = page.waitForEvent("download");

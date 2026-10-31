@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const openWordCounter = async (page: import("@playwright/test").Page) => {
   await page.goto("/");
-  await page.getByRole("button", { name: /^(Open|เปิด) (Word Counter|นับคำและตัวอักษร)$/ }).click();
+  await page.getByRole("link", { name: /^(Open|เปิด) (Word Counter|นับคำและตัวอักษร)$/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
 };
 
@@ -49,6 +49,40 @@ test("Back asks before discarding work and can stay", async ({ page }) => {
   await expect(page).toHaveURL(/\/word-counter$/);
   await expect(input).toHaveValue("งานที่ยังไม่บันทึก");
   page.once("dialog", (dialog) => dialog.accept());
+  await page.goBack();
+  await expect(page.getByRole("dialog")).toBeHidden();
+});
+
+test("a tool card is a real link that can open in a new tab", async ({ page, context }) => {
+  await page.goto("/");
+  const card = page.getByRole("link", { name: /^(Open|เปิด) (Word Counter|นับคำและตัวอักษร)$/ });
+  await expect(card).toHaveAttribute("href", "/word-counter");
+  const [opened] = await Promise.all([context.waitForEvent("page"), card.click({ modifiers: ["ControlOrMeta"] })]);
+  await expect(opened).toHaveURL(/\/word-counter$/);
+  await expect(opened.getByRole("dialog")).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("dialog")).toBeHidden();
+  await opened.close();
+});
+
+test("Back does not ask once the work is downloaded", async ({ page }) => {
+  await openWordCounter(page);
+  await page.getByRole("dialog").getByRole("textbox").first().fill("ข้อความ");
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: /Download text|ดาวน์โหลดข้อความ/ }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe("nexus-text.txt");
+  page.on("dialog", () => { throw new Error("Back should not ask after a download"); });
+  await page.goBack();
+  await expect(page.getByRole("dialog")).toBeHidden();
+});
+
+test("Back does not ask for the unit converter", async ({ page }) => {
+  page.on("dialog", () => { throw new Error("Back should not ask without work to lose"); });
+  await page.goto("/");
+  await page.getByRole("link", { name: /^(Open|เปิด) (Unit Converter|แปลงหน่วย)$/ }).click();
+  await page.getByRole("dialog").getByRole("spinbutton").first().fill("12");
   await page.goBack();
   await expect(page.getByRole("dialog")).toBeHidden();
 });

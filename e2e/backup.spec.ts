@@ -2,7 +2,7 @@ import { test, expect } from "./auth-fixture.js";
 test("backup restore previews, rejects invalid data and preserves counters",async({page})=>{
   await page.addInitScript(()=>localStorage.setItem("nexus-language",JSON.stringify({state:{language:"en"},version:0})));
   await page.goto("/");
-  await page.getByRole("button",{name:"Open Invoice Generator",exact:true}).click();
+  await page.getByRole("link",{name:"Open Invoice Generator",exact:true}).click();
   await page.getByText("Customers, products and document history",{exact:true}).click();
   const upload=page.getByLabel("Restore JSON backup (merge with existing data)");
   await upload.setInputFiles({name:"bad.json",mimeType:"application/json",buffer:Buffer.from('{"documents":[]}')});

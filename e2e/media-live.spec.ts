@@ -10,7 +10,7 @@ test("live private media upload, sharing, range and revocation",async({page,requ
     expect((await request.get("/api/manage-media")).status()).toBe(401);
     await page.addInitScript(()=>localStorage.setItem("nexus-language",JSON.stringify({state:{language:"en"},version:0})));
     await page.goto("/");
-    await page.getByRole("button",{name:"Open QR Code Generator",exact:true}).click();
+    await page.getByRole("link",{name:"Open QR Code Generator",exact:true}).click();
     await page.getByRole("combobox",{name:"QR type",exact:true}).selectOption("image");
     await page.getByText("Upload and manage Nexus media",{exact:true}).click();
     await page.getByLabel("Media administrator key (not saved)").fill(key);

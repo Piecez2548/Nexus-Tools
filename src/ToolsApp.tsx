@@ -1,6 +1,6 @@
 import AccountPanel from "./components/AccountPanel";
 import ToolLoadBoundary from "./components/ToolLoadBoundary";
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import {
   ArrowDown,
   ArrowRight,
@@ -24,6 +24,7 @@ import {
   categories,
   toolCatalog,
   filterTools,
+  toolPath,
   type CategoryId,
   type Tool,
 } from "./catalog";
@@ -57,6 +58,13 @@ export default function ToolsApp() {
       "ออกจากเครื่องมือนี้หรือไม่? งานที่ยังไม่ได้บันทึกจะหายไป",
     ),
   );
+  // Modified clicks stay with the browser, so a tool can open in a new tab or window.
+  const followToolLink = (event: MouseEvent<HTMLAnchorElement>, tool: Tool) => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    event.currentTarget.focus();
+    openTool(tool);
+  };
   const activeToolId = activeTool?.id;
   useEffect(() => {
     if (activeToolId) recordRecent(activeToolId);
@@ -338,13 +346,14 @@ export default function ToolsApp() {
               {recent.map((id) => {
                 const tool = toolCatalog.find((t) => t.id === id);
                 return tool ? (
-                  <button
+                  <a
                     key={id}
                     className="button secondary"
-                    onClick={() => openTool(tool)}
+                    href={toolPath(tool.id)}
+                    onClick={(event) => followToolLink(event, tool)}
                   >
                     {tool.name[language]}
-                  </button>
+                  </a>
                 ) : null;
               })}
               <button className="button secondary" onClick={clearRecent}>
@@ -391,12 +400,10 @@ export default function ToolsApp() {
                     key={tool.id}
                     className={`tool-card tone-${group.color}`}
                   >
-                    <button
+                    <a
                       className="tool-card-main"
-                      onClick={(event) => {
-                        event.currentTarget.focus();
-                        openTool(tool);
-                      }}
+                      href={toolPath(tool.id)}
+                      onClick={(event) => followToolLink(event, tool)}
                       aria-label={`${text("Open", "เปิด")} ${tool.name[language]}`}
                     >
                       <span className="tool-icon">
@@ -411,7 +418,7 @@ export default function ToolsApp() {
                         </span>
                         <ArrowRight size={16} />
                       </div>
-                    </button>
+                    </a>
                     <button
                       className={`favorite-button ${favorites.includes(tool.id) ? "saved" : ""}`}
                       aria-pressed={favorites.includes(tool.id)}

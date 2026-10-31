@@ -54,7 +54,7 @@ test("PDF merge downloads real ordered pages; invalid split is recoverable", asy
   const second = await PDFDocument.create();
   second.addPage([300, 400]);
   await page
-    .getByRole("button", { name: "Open Merge PDF", exact: true })
+    .getByRole("link", { name: "Open Merge PDF", exact: true })
     .click();
   await page.getByLabel("Choose files", { exact: true }).setInputFiles([
     {
@@ -80,7 +80,7 @@ test("PDF merge downloads real ordered pages; invalid split is recoverable", asy
   ).toEqual([300, 100]);
   await page.getByRole("button", { name: "Close tool" }).click();
   await page
-    .getByRole("button", { name: "Open Split PDF", exact: true })
+    .getByRole("link", { name: "Open Split PDF", exact: true })
     .click();
   await page.getByLabel("Choose files", { exact: true }).setInputFiles({
     name: "merged.pdf",
@@ -102,7 +102,7 @@ test("image conversion and compression generate valid files", async ({
   const fixture = await toBuffer("Nexus image test", { width: 64 });
   for (const name of ["Image Converter", "Image Compressor"]) {
     await page
-      .getByRole("button", { name: `Open ${name}`, exact: true })
+      .getByRole("link", { name: `Open ${name}`, exact: true })
       .click();
     await page.getByLabel("Choose files", { exact: true }).setInputFiles({
       name: "pixel.png",
@@ -124,7 +124,7 @@ test("QR generates SVG, clears stale results and traps keyboard focus", async ({
   page,
 }) => {
   await page
-    .getByRole("button", { name: "Open QR Code Generator", exact: true })
+    .getByRole("link", { name: "Open QR Code Generator", exact: true })
     .click();
   await page.getByLabel("Text or link").fill("https://example.com/hello");
   await page.getByRole("button", { name: "Generate file" }).click();
@@ -145,7 +145,7 @@ test("QR generates SVG, clears stale results and traps keyboard focus", async ({
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "Open QR Code Generator", exact: true }),
+    page.getByRole("link", { name: "Open QR Code Generator", exact: true }),
   ).toBeFocused();
 });
 
@@ -153,7 +153,7 @@ test("unit conversion and text counting work with actual user input", async ({
   page,
 }) => {
   await page
-    .getByRole("button", { name: "Open Unit Converter", exact: true })
+    .getByRole("link", { name: "Open Unit Converter", exact: true })
     .click();
   await page.getByLabel("Value", { exact: true }).fill("1500");
   await expect(page.locator(".calculation-result strong")).toHaveText("1.5 km");
@@ -164,7 +164,7 @@ test("unit conversion and text counting work with actual user input", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Close tool" }).click();
   await page
-    .getByRole("button", { name: "Open Word Counter", exact: true })
+    .getByRole("link", { name: "Open Word Counter", exact: true })
     .click();
   await page.getByLabel("Your text").fill("กิ้ 👨‍👩‍👧‍👦");
   await expect(page.locator(".text-stats > div").filter({ hasText: "Characters (UTF-16)" }).locator("strong")).toHaveText("15");
@@ -182,7 +182,7 @@ test("invoice downloads a real PDF directly and calculates tax", async ({
   page,
 }, testInfo) => {
   await page
-    .getByRole("button", { name: "Open Invoice Generator", exact: true })
+    .getByRole("link", { name: "Open Invoice Generator", exact: true })
     .click();
   await page.getByLabel("Seller / business").fill("Nexus Demo");
   await page.getByLabel("Invoice number").fill("INV-001");
@@ -235,7 +235,7 @@ test("mobile menu, tool interaction and layout fit the viewport", async ({
   await expect(page.getByText("Nothing here just yet")).toBeVisible();
   await page.getByRole("button", { name: "Show all tools" }).click();
   await page
-    .getByRole("button", { name: "Open Unit Converter", exact: true })
+    .getByRole("link", { name: "Open Unit Converter", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("button", { name: "Close tool" }).click();

@@ -3,6 +3,12 @@
 // mojibake — prefixing the BOM makes it detect UTF-8 correctly.
 const UTF8_BOM = "﻿";
 
+export const workSavedEvent = "nexus-tool-work-saved";
+
+export function markWorkSaved() {
+  window.dispatchEvent(new Event(workSavedEvent));
+}
+
 export function downloadFile(filename: string, content: string | Blob, mimeType: string) {
   const body = typeof content === "string" && mimeType.startsWith("text/csv") ? UTF8_BOM + content : content;
   const blob = new Blob([body], { type: mimeType });
@@ -12,6 +18,7 @@ export function downloadFile(filename: string, content: string | Blob, mimeType:
   link.href = url;
   link.download = filename;
   link.click();
+  markWorkSaved();
 
   // WebKit can start consuming the Blob asynchronously after click();
   // revoking in the same turn can cancel the download before it begins.

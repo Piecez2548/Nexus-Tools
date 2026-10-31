@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 const PdfPreview = lazy(() => import("./PdfPreview"));
 import { Check, Download, LoaderCircle, X } from "lucide-react";
+import { markWorkSaved } from "@/shared/download";
 import { useLanguageStore } from "@/shared/languageStore";
 import { formatBytes } from "../services/files";
 import { messages } from "../services/errors";
@@ -53,7 +54,7 @@ export default function ResultPanel({
                 : ""}
             </p>
           )}
-          {!hideDownload && <a className="button" href={result.url} download={result.filename}>
+          {!hideDownload && <a className="button" href={result.url} download={result.filename} onClick={markWorkSaved}>
             <Download size={17} />
             {t("Download", "ดาวน์โหลด")} {result.filename}
           </a>}

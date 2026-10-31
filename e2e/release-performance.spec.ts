@@ -22,7 +22,7 @@ test("mobile constrained startup measurements", async ({ page }, info) => {
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1000);
     const start = Date.now();
-    await page.getByRole("button", { name: "Open QR Code Generator", exact: true }).click();
+    await page.getByRole("link", { name: "Open QR Code Generator", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByRole("textbox").last()).toBeVisible();
     const toolReadyMs = Date.now() - start;
