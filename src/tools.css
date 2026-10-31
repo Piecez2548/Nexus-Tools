@@ -1363,3 +1363,40 @@ html[data-tools-theme="light"] .favorite-button.saved {
 .date-rows dt {font-size:13px;color:var(--muted);}
 .date-rows dd {margin:0;font-weight:500;overflow-wrap:anywhere;}
 .year-row {grid-template-columns:1fr 0 1fr;}
+
+/* Everyday tools: loan schedule table and option checkboxes */
+.table-scroll {
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.loan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.loan-table th,
+.loan-table td {
+  padding: 7px 10px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.loan-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+.loan-table tbody th {
+  text-align: left;
+  font-weight: 500;
+}
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+}

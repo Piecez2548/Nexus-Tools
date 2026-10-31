@@ -106,7 +106,7 @@ export function parseMoney(raw: string, code = "tax") {
   return satang;
 }
 // Rounds half up for non-negative values.
-const roundedDivide = (numerator: bigint, denominator: bigint) => (numerator * 2n + denominator) / (2n * denominator);
+export const roundedDivide = (numerator: bigint, denominator: bigint) => (numerator * 2n + denominator) / (2n * denominator);
 
 /** All amounts are in satang so that no floating point rounding is involved. */
 export function withholdingTax(rawAmount: string, vat: VatMode, rawRate: string) {

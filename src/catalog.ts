@@ -22,6 +22,10 @@ import {
   FileDown,
   Landmark,
   FileImage as PhotoFile,
+  HandCoins,
+  CalendarRange,
+  Languages,
+  KeyRound,
 } from "lucide-react";
 import type { Language } from "@/shared/languageStore";
 
@@ -351,6 +355,46 @@ export const toolCatalog = [
     description: copy(
       "Turn iPhone HEIC photos into JPG files that open anywhere.",
       "แปลงภาพ HEIC จาก iPhone เป็น JPG ที่เปิดได้ทุกที่",
+    ),
+  },
+  {
+    id: "loan-calculator",
+    category: "calculate",
+    icon: HandCoins,
+    name: copy("Loan Instalment Calculator", "คำนวณค่างวดผ่อนชำระ"),
+    description: copy(
+      "Monthly payment for home and car loans, and the real rate behind a flat rate.",
+      "ค่างวดผ่อนบ้านและรถ พร้อมดูอัตราดอกเบี้ยที่แท้จริงของ Flat rate",
+    ),
+  },
+  {
+    id: "date-calculator",
+    category: "calculate",
+    icon: CalendarRange,
+    name: copy("Age & Date Difference", "คำนวณอายุและระยะห่างวันที่"),
+    description: copy(
+      "Years, months and days between two dates, with the next birthday.",
+      "นับปี เดือน วัน ระหว่างสองวันที่ พร้อมวันเกิดครั้งถัดไป",
+    ),
+  },
+  {
+    id: "thai-digits",
+    category: "text",
+    icon: Languages,
+    name: copy("Thai / Arabic Digits", "แปลงเลขไทย ↔ เลขอารบิก"),
+    description: copy(
+      "Switch ๑๒๓ and 123 in any text, for official documents.",
+      "สลับ ๑๒๓ กับ 123 ในข้อความ สำหรับเอกสารราชการ",
+    ),
+  },
+  {
+    id: "password-generator",
+    category: "text",
+    icon: KeyRound,
+    name: copy("Password Generator", "สร้างรหัสผ่านแบบสุ่ม"),
+    description: copy(
+      "Strong random passwords made in your browser.",
+      "รหัสผ่านสุ่มที่แข็งแรง สร้างในเบราว์เซอร์ของคุณ",
     ),
   },
 ] as const;
