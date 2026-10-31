@@ -15,8 +15,10 @@ const ThaiTools = lazy(() => import("./ThaiTools"));
 const PdfToImages = lazy(() => import("./PdfToImages"));
 const QrReader = lazy(() => import("./QrReader"));
 const PromptPayQr = lazy(() => import("./PromptPayQr"));
+const PdfCompress = lazy(() => import("./PdfCompress"));
+const HeicToJpg = lazy(() => import("./HeicToJpg"));
 // Short calculations that are quick to retype, so leaving them needs no confirmation.
-const disposableInputTools = new Set<string>(["unit-converter", "baht-text", "buddhist-year", "withholding-tax", "vat-calculator", "thai-id", "promptpay-qr"]);
+const disposableInputTools = new Set<string>(["unit-converter", "baht-text", "buddhist-year", "withholding-tax", "vat-calculator", "thai-id", "promptpay-qr", "income-tax"]);
 // Option controls are settings rather than work.
 const holdsWork = (field: Element) =>
   field.matches("textarea, input:not([type=checkbox], [type=radio], [type=range], [type=color])");
@@ -119,8 +121,13 @@ export default function ToolWorkspace({
           tool.id === "buddhist-year" ||
           tool.id === "withholding-tax" ||
           tool.id === "vat-calculator" ||
-          tool.id === "thai-id" ? (
+          tool.id === "thai-id" ||
+          tool.id === "income-tax" ? (
           <ThaiTools mode={tool.id} />
+        ) : tool.id === "heic-to-jpg" ? (
+          <HeicToJpg />
+        ) : tool.id === "pdf-compress" ? (
+          <PdfCompress />
         ) : tool.id === "promptpay-qr" ? (
           <PromptPayQr />
         ) : tool.id === "unit-converter" || tool.id === "word-counter" ? (

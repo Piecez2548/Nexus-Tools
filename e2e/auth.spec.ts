@@ -7,7 +7,7 @@ for (const suffix of ["/", "/?from=all", "/?nexus_sso=" + "a".repeat(64)]) {
     await mockAccount(page, false);
     await page.route(all, route => route.fulfill({ contentType: "text/html", body: "<h1>Nexus All sign in</h1>" }));
     await page.goto(suffix);
-    await expect(page.locator(".tool-card")).toHaveCount(25);
+    await expect(page.locator(".tool-card")).toHaveCount(28);
     await expect(page.getByRole("button", { name: "Sync business data", exact: true })).toHaveCount(0);
   });
 }
@@ -18,7 +18,7 @@ test("account sign in cannot skip an enrolled MFA factor", async ({ page }) => {
   await page.route("**/auth/v1/**", route => route.fulfill({ json: route.request().url().endsWith("/user") ? user : { ...session("aal1"), user } }));
   await page.route(all, route => route.fulfill({ contentType: "text/html", body: "<h1>Nexus All sign in</h1>" }));
   await page.goto("/");
-  await expect(page.locator(".tool-card")).toHaveCount(25);
+  await expect(page.locator(".tool-card")).toHaveCount(28);
   await page.getByText("Nexus account / Cloud sync", { exact: true }).click();
   await expect(page.getByRole("heading", { name: "Two-factor verification" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Sync business data", exact: true })).toHaveCount(0);
@@ -28,10 +28,10 @@ test("verified account signs out while public tools remain usable", async ({ pag
   await mockAccount(page);
   await page.route(all, route => route.fulfill({ contentType: "text/html", body: "<h1>Nexus All sign in</h1>" }));
   await page.goto("/");
-  await expect(page.locator(".tool-card")).toHaveCount(25);
+  await expect(page.locator(".tool-card")).toHaveCount(28);
   await page.getByText("Nexus account / Cloud sync", { exact: true }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page.locator(".tool-card")).toHaveCount(25);
+  await expect(page.locator(".tool-card")).toHaveCount(28);
 });
 
 test("account sign in from Nexus hands off session without credentials in URL", async ({ page, context, baseURL }) => {
@@ -52,7 +52,7 @@ test("account sign in from Nexus hands off session without credentials in URL", 
   const opened = page.waitForEvent("popup");
   await page.getByRole("button", { name: "Tools", exact: true }).click();
   const child = await opened;
-  await expect(child.locator(".tool-card")).toHaveCount(25);
+  await expect(child.locator(".tool-card")).toHaveCount(28);
   await expect.poll(() => child.evaluate(() => location.href)).not.toContain("nexus_sso");
   await expect.poll(() => child.evaluate(() => location.href)).not.toContain("token");
   await expect.poll(() => child.evaluate(() => window.opener === null)).toBe(true);

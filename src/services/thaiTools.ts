@@ -154,3 +154,33 @@ export function checkThaiId(raw: string) {
     formatted: `${digits[0]}-${digits.slice(1, 5)}-${digits.slice(5, 10)}-${digits.slice(10, 12)}-${digits[12]}`,
   };
 }
+
+// Progressive rates for personal income tax on net income (after expenses and allowances),
+// in force since tax year 2017. Upper limits are in baht; the last band has none.
+const incomeTaxBands = [
+  { from: 0n, to: 150_000n, percent: 0n },
+  { from: 150_000n, to: 300_000n, percent: 5n },
+  { from: 300_000n, to: 500_000n, percent: 10n },
+  { from: 500_000n, to: 750_000n, percent: 15n },
+  { from: 750_000n, to: 1_000_000n, percent: 20n },
+  { from: 1_000_000n, to: 2_000_000n, percent: 25n },
+  { from: 2_000_000n, to: 5_000_000n, percent: 30n },
+  { from: 5_000_000n, to: null, percent: 35n },
+] as const;
+
+/** Tax on net income, band by band. Amounts are in satang; the total is rounded half up. */
+export function incomeTax(rawNetIncome: string) {
+  const income = parseMoney(rawNetIncome, "income");
+  const rows = incomeTaxBands.map((band) => {
+    const lower = band.from * 100n;
+    const upper = band.to === null ? income : band.to * 100n;
+    const taxable = income > lower ? (income < upper ? income : upper) - lower : 0n;
+    return { from: band.from, to: band.to, percent: band.percent, taxable, exact: taxable * band.percent };
+  });
+  const tax = roundedDivide(rows.reduce((sum, row) => sum + row.exact, 0n), 100n);
+  return {
+    income,
+    tax,
+    rows: rows.map((row) => ({ from: row.from, to: row.to, percent: row.percent, taxable: row.taxable, tax: roundedDivide(row.exact, 100n) })),
+  };
+}

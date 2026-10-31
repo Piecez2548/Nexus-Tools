@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bahtText, checkThaiId, convertYear, describeDate, formatSatang, vatBreakdown, withholdingTax } from "./thaiTools";
+import { bahtText, checkThaiId, convertYear, describeDate, formatSatang, incomeTax, vatBreakdown, withholdingTax } from "./thaiTools";
 
 describe("baht text", () => {
   it.each([
@@ -151,5 +151,32 @@ describe("Thai national ID", () => {
   });
   it.each(["", "123", "11017002306781", "11017002306a3", "1.101700230673"])("rejects %j", (input) => {
     expect(() => checkThaiId(input)).toThrow("nationalid");
+  });
+});
+
+describe("income tax", () => {
+  it.each([
+    ["100000", "0.00"],
+    ["150000", "0.00"],
+    ["150001", "0.05"],
+    ["300000", "7,500.00"],
+    ["500000", "27,500.00"],
+    ["750000", "65,000.00"],
+    ["1000000", "115,000.00"],
+    ["2000000", "365,000.00"],
+    ["5000000", "1,265,000.00"],
+    ["6000000", "1,615,000.00"],
+    ["600,000.50", "42,500.08"],
+  ])("taxes %s net income at %s", (income, tax) => {
+    expect(formatSatang(incomeTax(income).tax)).toBe(tax);
+  });
+  it("splits the income across the bands", () => {
+    const result = incomeTax("620000");
+    expect(result.rows.map((row) => formatSatang(row.taxable))).toEqual(["150,000.00", "150,000.00", "200,000.00", "120,000.00", "0.00", "0.00", "0.00", "0.00"]);
+    expect(result.rows.map((row) => formatSatang(row.tax))).toEqual(["0.00", "7,500.00", "20,000.00", "18,000.00", "0.00", "0.00", "0.00", "0.00"]);
+    expect(formatSatang(result.tax)).toBe("45,500.00");
+  });
+  it.each(["", "0", "-5", "1.234", "abc", "10000000001"])("rejects %j", (input) => {
+    expect(() => incomeTax(input)).toThrow("income");
   });
 });

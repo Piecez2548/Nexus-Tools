@@ -19,6 +19,9 @@ import {
   BadgePercent,
   IdCard,
   Smartphone,
+  FileDown,
+  Landmark,
+  FileImage as PhotoFile,
 } from "lucide-react";
 import type { Language } from "@/shared/languageStore";
 
@@ -318,6 +321,36 @@ export const toolCatalog = [
     description: copy(
       "Make a PromptPay QR for a mobile number and an amount.",
       "สร้าง QR พร้อมเพย์จากเบอร์มือถือและจำนวนเงิน",
+    ),
+  },
+  {
+    id: "pdf-compress",
+    category: "pdf",
+    icon: FileDown,
+    name: copy("PDF Compressor", "บีบอัด PDF"),
+    description: copy(
+      "Shrink scanned or image-heavy PDFs by rebuilding pages as images.",
+      "ลดขนาด PDF สแกนหรือไฟล์ที่เป็นภาพ โดยรวมหน้าใหม่เป็นภาพ",
+    ),
+  },
+  {
+    id: "income-tax",
+    category: "calculate",
+    icon: Landmark,
+    name: copy("Income Tax Calculator", "คำนวณภาษีเงินได้บุคคลธรรมดา"),
+    description: copy(
+      "Work out personal income tax from net income using the progressive rates.",
+      "คำนวณภาษีจากเงินได้สุทธิตามอัตราก้าวหน้า",
+    ),
+  },
+  {
+    id: "heic-to-jpg",
+    category: "image",
+    icon: PhotoFile,
+    name: copy("HEIC to JPG", "แปลง HEIC เป็น JPG"),
+    description: copy(
+      "Turn iPhone HEIC photos into JPG files that open anywhere.",
+      "แปลงภาพ HEIC จาก iPhone เป็น JPG ที่เปิดได้ทุกที่",
     ),
   },
 ] as const;

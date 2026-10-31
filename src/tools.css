@@ -899,8 +899,10 @@ h2 {
     margin-bottom: 30px;
   }
   .category-tile {
+    flex: none;
     min-width: 65px;
     font-size: 13px;
+    white-space: nowrap;
   }
   .category-icon {
     width: 52px;
