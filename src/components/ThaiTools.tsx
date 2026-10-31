@@ -8,6 +8,7 @@ import {
   convertYear,
   describeDate,
   formatSatang,
+  incomeTax,
   vatBreakdown,
   withholdingRates,
   withholdingTax,
@@ -16,7 +17,7 @@ import {
   type YearDirection,
 } from "../services/thaiTools";
 
-type Mode = "baht-text" | "buddhist-year" | "withholding-tax" | "vat-calculator" | "thai-id";
+type Mode = "baht-text" | "buddhist-year" | "withholding-tax" | "vat-calculator" | "thai-id" | "income-tax";
 
 function attempt<T>(calculate: () => T): { value: T | null; error: string } {
   try {
@@ -43,6 +44,7 @@ export default function ThaiTools({ mode }: { mode: Mode }) {
   if (mode === "buddhist-year") return <BuddhistYear t={t} failure={failure} />;
   if (mode === "vat-calculator") return <VatCalculator t={t} failure={failure} />;
   if (mode === "thai-id") return <ThaiIdCheck t={t} failure={failure} />;
+  if (mode === "income-tax") return <IncomeTax t={t} failure={failure} />;
   return <WithholdingTax t={t} failure={failure} language={language} />;
 }
 
@@ -360,6 +362,57 @@ function ThaiIdCheck({ t, failure }: Helpers) {
         {t(
           "This only checks the format and the last (check) digit. It cannot tell whether the number was issued or who it belongs to. The number is checked in your browser and is not sent or saved anywhere.",
           "ตรวจเฉพาะรูปแบบและเลขตรวจสอบหลักสุดท้าย ไม่สามารถบอกได้ว่าเลขนี้ถูกออกให้ใครจริงหรือไม่ เลขถูกตรวจในเบราว์เซอร์ ไม่ถูกส่งหรือบันทึกที่ไหน",
+        )}
+      </p>
+    </div>
+  );
+}
+
+function IncomeTax({ t, failure }: Helpers) {
+  const [income, setIncome] = useState("");
+  const result = income.trim() ? attempt(() => incomeTax(income)) : null;
+  const bandLabel = (from: bigint, to: bigint | null) =>
+    to === null ? t(`Over ${from.toLocaleString("en-US")}`, `เกิน ${from.toLocaleString("en-US")}`) : `${from.toLocaleString("en-US")} – ${to.toLocaleString("en-US")}`;
+  return (
+    <div className="tool-fields">
+      <label className="field">
+        {t("Net income for the year (baht)", "เงินได้สุทธิทั้งปี (บาท)")}
+        <input inputMode="decimal" autoComplete="off" value={income} onChange={(event) => setIncome(event.target.value)} placeholder="620,000" />
+        <small>
+          {t(
+            "Net income is what remains after expenses and allowances (ค่าใช้จ่ายและค่าลดหย่อน).",
+            "เงินได้สุทธิ คือเงินได้หลังหักค่าใช้จ่ายและค่าลดหย่อนแล้ว",
+          )}
+        </small>
+      </label>
+      <div className="calculation-result" aria-live="polite">
+        {result?.error ? (
+          failure(result.error)
+        ) : result?.value ? (
+          <>
+            <dl className="date-rows">
+              {result.value.rows
+                .filter((row) => row.taxable > 0n)
+                .map((row) => (
+                  <div key={row.from.toString()}>
+                    <dt>
+                      {bandLabel(row.from, row.to)} ({row.percent.toString()}%)
+                    </dt>
+                    <dd>{formatSatang(row.tax)}</dd>
+                  </div>
+                ))}
+            </dl>
+            <span>{t("Income tax for the year", "ภาษีเงินได้บุคคลธรรมดาทั้งปี")}</span>
+            <strong>{formatSatang(result.value.tax)}</strong>
+          </>
+        ) : (
+          <span>{t("Enter net income to see the tax.", "กรอกเงินได้สุทธิเพื่อดูภาษี")}</span>
+        )}
+      </div>
+      <p className="field-hint">
+        {t(
+          "Uses the progressive rates in force since tax year 2017: 0% up to 150,000 baht, then 5%, 10%, 15%, 20%, 25%, 30% and 35% above 5,000,000 baht. It does not work out expenses or allowances, minimum tax or credits already withheld. This is a calculator, not tax advice. Check with the Revenue Department (rd.go.th) or your accountant.",
+          "ใช้อัตราก้าวหน้าที่ใช้มาตั้งแต่ปีภาษี 2560: ไม่เกิน 150,000 บาท ได้รับยกเว้น จากนั้น 5%, 10%, 15%, 20%, 25%, 30% และ 35% สำหรับส่วนที่เกิน 5,000,000 บาท ไม่ได้คำนวณค่าใช้จ่าย ค่าลดหย่อน ภาษีขั้นต่ำ หรือภาษีที่ถูกหักไว้แล้ว เครื่องมือนี้ช่วยคำนวณ ไม่ใช่คำแนะนำด้านภาษี ควรตรวจกับกรมสรรพากร (rd.go.th) หรือนักบัญชี",
         )}
       </p>
     </div>

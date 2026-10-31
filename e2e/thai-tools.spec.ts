@@ -124,3 +124,17 @@ test("PromptPay QR is a real PromptPay code that the QR reader can read back", a
   await page.getByRole("dialog").getByRole("button", { name: "Create PromptPay QR" }).click();
   await expect(page.getByRole("dialog").getByRole("alert")).toContainText("PromptPay number");
 });
+
+test("income tax splits net income across the progressive bands", async ({ page }) => {
+  await page.goto("/income-tax");
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Net income for the year (baht)").fill("620,000");
+  await expect(dialog.getByText("Income tax for the year")).toBeVisible();
+  await expect(dialog.locator("strong", { hasText: "45,500.00" })).toBeVisible();
+  await expect(dialog.getByText("150,000 – 300,000 (5%)")).toBeVisible();
+  await dialog.getByLabel("Net income for the year (baht)").fill("6000000");
+  await expect(dialog.locator("strong", { hasText: "1,615,000.00" })).toBeVisible();
+  await expect(dialog.getByText("Over 5,000,000 (35%)")).toBeVisible();
+  await dialog.getByLabel("Net income for the year (baht)").fill("-1");
+  await expect(dialog.getByRole("alert")).toContainText("net income above 0");
+});

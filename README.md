@@ -13,9 +13,26 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 - **โปรเจกต์ Vercel:** `nexus-tools` แยกจากโปรเจกต์ `nexus`
 - **อัปเดตเอกสาร:** 31 ตุลาคม 2026
 
+## At a glance (English)
+
+A portfolio project: 28 everyday tools for Thai and English users that run in the browser, so ordinary files never leave the device.
+
+- **Document tools:** merge, split, reorder, rotate and watermark PDFs; PDF to images; PDF compressor; images to PDF; OCR for Thai and English; invoices, quotations and receipts as A4 PDFs with PromptPay QR.
+- **Image tools:** compress, convert, HEIC to JPG, crop, watermark, batch to ZIP, remove a solid background.
+- **Thai-specific tools:** baht amounts in Thai words, B.E./C.E. year and date converter, withholding tax, VAT 7%, personal income tax, national ID check digit, PromptPay QR.
+- **Every tool has its own URL**, page title, share preview and structured data, so tools can be linked, reloaded and found by search engines. Back and Esc ask before discarding unsaved work.
+
+### Engineering notes
+
+- **Local first.** PDF.js, pdf-lib, Tesseract.js, jsQR, libheif and fflate run in the browser; only the optional Nexus media sharing uploads files. Heavy tools are lazy-loaded so the home page stays light.
+- **Money is never a float.** Tax and VAT calculators work in integer satang with `BigInt` and round half up, with unit tests for the edge cases.
+- **Static pages for each tool.** A post-build script writes one HTML file per tool plus `sitemap.xml`, so crawlers and link previews see real titles and metadata before any JavaScript runs.
+- **Tested across browsers.** Vitest unit tests, plus Playwright end-to-end tests on Chromium, Firefox and WebKit, mobile profiles, accessibility (axe) and a mobile performance budget. CI runs the same suite against production after each deploy.
+- **Defensive by default.** Strict CSP, no inline scripts, QR links open only for http/https, size and page limits on every file tool.
+
 ## Capabilities
 
-- 25 tools, each with its own address (for example `/withholding-tax`), page title, share preview and structured data, with lazy-loaded workspaces to keep the initial interface lightweight
+- 28 tools, each with its own address (for example `/withholding-tax`), page title, share preview and structured data, with lazy-loaded workspaces to keep the initial interface lightweight
 - Direct A4 PDF generation for quotations, invoices, and receipts with Thai text, watermarks, logos, signatures, tax, and PromptPay QR
 - Browser-local PDF/image/OCR processing with explicit limits, validation, recoverable errors, and no upload for ordinary tools
 - Supabase authentication with email verification and MFA enforcement, plus a nonce-bound cross-origin session handoff from Nexus
@@ -24,7 +41,7 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 
 ## Tech stack
 
-`React 19` · `TypeScript` · `Vite` · `Zustand` · `Supabase Auth` · `Vercel Functions/Blob` · `pdf-lib` · `PDF.js` · `Tesseract.js` · `jsQR` · `fflate` · `Playwright` · `Vitest`
+`React 19` · `TypeScript` · `Vite` · `Zustand` · `Supabase Auth` · `Vercel Functions/Blob` · `pdf-lib` · `PDF.js` · `Tesseract.js` · `jsQR` · `libheif-js` · `fflate` · `Playwright` · `Vitest`
 
 > This repository is published for portfolio review. No open-source license is granted; all rights are reserved by the author.
 
@@ -40,7 +57,7 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 
 ## Available capabilities
 
-รายการในหน้าเว็บมี 25 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
+รายการในหน้าเว็บมี 28 เครื่องมือ โดยเครื่องมือเอกสารธุรกิจรองรับเอกสาร 3 ประเภทในฟอร์มเดียว
 
 | เครื่องมือ | การทำงาน | ข้อจำกัดหลัก |
 | --- | --- | --- |
@@ -69,6 +86,9 @@ Nexus Tools เป็น workspace สำหรับเอกสารและ
 | คำนวณ VAT 7% | บวก VAT เข้ากับราคา หรือแยก VAT ออกจากราคารวม | คำนวณเป็นสตางค์ด้วยจำนวนเต็ม ปัดครึ่งขึ้น; ไม่ใช่คำแนะนำด้านภาษี |
 | ตรวจเลขบัตรประชาชน | ตรวจรูปแบบ 13 หลักและเลขตรวจสอบหลักสุดท้าย | ไม่ยืนยันว่าเลขถูกออกให้ใครจริงหรือไม่; ตรวจในเบราว์เซอร์ ไม่ส่งหรือบันทึกเลข |
 | สร้าง QR พร้อมเพย์ | สร้าง QR พร้อมเพย์จากเบอร์มือถือและจำนวนเงินคงที่ ดาวน์โหลดเป็น PNG | เบอร์มือถือเท่านั้น; ไม่ตรวจกับธนาคาร |
+| คำนวณภาษีเงินได้บุคคลธรรมดา | คำนวณภาษีจากเงินได้สุทธิตามอัตราก้าวหน้า 0–35% แยกรายขั้น | ไม่คำนวณค่าลดหย่อน ภาษีขั้นต่ำ หรือภาษีที่ถูกหักไว้; ไม่ใช่คำแนะนำด้านภาษี |
+| บีบอัด PDF | แปลงทุกหน้าเป็นภาพ JPEG แล้วรวมเป็น PDF ใหม่ เลือกคุณภาพ 3 ระดับ | ข้อความจะเลือก/ค้นหาไม่ได้ ลิงก์และฟอร์มหาย; ไฟล์ข้อความล้วนอาจใหญ่ขึ้น; 100 หน้า / 50 MB |
+| แปลง HEIC เป็น JPG | แปลงภาพ HEIC/HEIF จาก iPhone เป็น JPG หลายไฟล์ได้ ZIP | ไฟล์ละไม่เกิน 30 MB / 24 ล้านพิกเซล; ภาพนิ่งหลักเท่านั้น ไม่คัดลอก EXIF |
 
 ไฟล์ PDF ที่มีรหัสผ่านหรือการป้องกันจะถูกปฏิเสธ การส่งออก PDF ไม่รับประกันการคงบุ๊กมาร์ก ลายเซ็นดิจิทัล หรือฟอร์มโต้ตอบ ส่วนรูปภาพที่แปลงแล้วไม่คงภาพเคลื่อนไหว/metadata และขนาดไฟล์อาจไม่เล็กลงเสมอไป
 
@@ -148,6 +168,11 @@ OCR รองรับภาษาไทย อังกฤษ หรือท�
 ชื่อบุคคล ตัวเลข วรรณยุกต์ ลายมือ ภาพไม่ชัด และภาพติดลายน้ำยังต้องตรวจทาน OCR ไม่สามารถอ่านส่วนที่อยู่นอกภาพหรือถูกตัดออกจากภาพหน้าจอได้
 
 ตัวนับข้อความรวมช่องว่างด้วย โดยแยก UTF-16 units ออกจากตัวอักษรที่มองเห็น (grapheme clusters) สระ/วรรณยุกต์และ emoji จึงอาจทำให้สองจำนวนนี้ต่างกัน เบราว์เซอร์ปรับการขึ้นบรรทัดเป็น LF ควรใช้ข้อความและรูปแบบขึ้นบรรทัดเดียวกันเมื่อตรวจเทียบกับโปรแกรมอื่น
+
+## Third-party notices
+
+- **libheif-js** (used only by the HEIC to JPG tool, loaded on demand) is licensed under the GNU LGPL-3.0. The unmodified library is bundled into its own lazily loaded chunk; its license text is in `node_modules/libheif-js/libheif-wasm/LICENSE` after `npm install`. If you redistribute this project, keep that notice and make sure users can replace the library.
+- Other dependencies keep their own licenses; see `docs/nexus-tools-npm-sbom.cdx.json`.
 
 ## เทคโนโลยีและโครงสร้าง
 

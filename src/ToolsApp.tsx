@@ -1,4 +1,3 @@
-import AccountPanel from "./components/AccountPanel";
 import ToolLoadBoundary from "./components/ToolLoadBoundary";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import {
@@ -31,6 +30,8 @@ import {
 import { useToolRoute } from "./hooks/useToolRoute";
 import { useToolsPreferences } from "./store";
 
+// The account panel brings in the Supabase client, so it loads after the first paint.
+const AccountPanel = lazy(() => import("./components/AccountPanel"));
 const ToolWorkspace = lazy(() => import("./components/ToolWorkspace"));
 
 export default function ToolsApp() {
@@ -50,6 +51,8 @@ export default function ToolsApp() {
   const [view, setView] = useState<"home" | "all" | "favorites">("home");
   const [sort, setSort] = useState("recommended");
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Remembers a click on the account panel made before its code finished loading.
+  const [accountOpened, setAccountOpened] = useState(false);
   const toolTitle = useCallback((tool: Tool) => tool.name[language], [language]);
   const { activeTool, openTool, closeTool, setDirty } = useToolRoute(
     toolTitle,
@@ -288,7 +291,15 @@ export default function ToolsApp() {
           </div>
         </header>
         <main id="tools-main" tabIndex={-1}>
-          <AccountPanel />
+          <Suspense
+            fallback={
+              <details className="account-panel" onToggle={(event) => setAccountOpened(event.currentTarget.open)}>
+                <summary>{text("Nexus account / Cloud sync", "บัญชี Nexus / ซิงก์ข้อมูล")}</summary>
+              </details>
+            }
+          >
+            <AccountPanel initiallyOpen={accountOpened} />
+          </Suspense>
           {view === "home" && !query && (
             <section className="hero">
               <div className="eyebrow">

@@ -74,3 +74,67 @@ test("QR reader finds the text, offers web links only, and explains failures", a
   await choose("blank.png", Buffer.from(blank, "base64"));
   await expect(dialog.getByRole("alert")).toContainText("No QR code found");
 });
+
+test("PDF compressor rebuilds an image-heavy PDF smaller, with the same pages and sizes", async ({ page }) => {
+  // A noisy picture compresses badly as PNG but well as JPEG, like a scan.
+  const noise = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 700;
+    canvas.height = 900;
+    const context = canvas.getContext("2d")!;
+    const data = context.createImageData(700, 900);
+    for (let i = 0; i < data.data.length; i += 4) {
+      const value = (Math.random() * 255) | 0;
+      data.data.set([value, 255 - value, (value * 7) % 255, 255], i);
+    }
+    context.putImageData(data, 0, 0);
+    return canvas.toDataURL("image/png").split(",")[1];
+  });
+  const pdf = await PDFDocument.create();
+  const image = await pdf.embedPng(Buffer.from(noise, "base64"));
+  for (const size of [[350, 450], [450, 350]] as const) pdf.addPage([...size]).drawImage(image, { x: 0, y: 0, width: size[0], height: size[1] });
+  const original = Buffer.from(await pdf.save());
+
+  await page.goto("/pdf-compress");
+  const dialog = page.getByRole("dialog");
+  await expect(page).toHaveTitle("PDF Compressor | Nexus Tools");
+  await expect(dialog.getByRole("button", { name: "Compress PDF" })).toBeDisabled();
+  await dialog.getByLabel("Choose files", { exact: true }).setInputFiles({ name: "scan.pdf", mimeType: "application/pdf", buffer: original });
+  await dialog.getByLabel("Quality").selectOption("smaller");
+  await dialog.getByRole("button", { name: "Compress PDF" }).click();
+  await expect(dialog.getByText("Your file is ready")).toBeVisible();
+  await expect(dialog.getByText("2 pages in the exported PDF")).toBeVisible();
+  const bytes = await download(page);
+  expect(bytes.byteLength).toBeLessThan(original.byteLength);
+  const result = await PDFDocument.load(bytes);
+  expect(result.getPages().map((p) => [Math.round(p.getWidth()), Math.round(p.getHeight())])).toEqual([[350, 450], [450, 350]]);
+});
+
+// A real photo is needed for the decoder test. It is not stored in the repository:
+// set NEXUS_HEIC_SAMPLE to the path of any .heic file to run it.
+test("HEIC photos convert to a real JPEG", async ({ page }) => {
+  test.skip(!process.env.NEXUS_HEIC_SAMPLE, "set NEXUS_HEIC_SAMPLE to a .heic file to run this test");
+  const photo = await readFile(process.env.NEXUS_HEIC_SAMPLE!);
+  await page.goto("/heic-to-jpg");
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Choose files", { exact: true }).setInputFiles({ name: "IMG_0001.HEIC", mimeType: "", buffer: photo });
+  await dialog.getByRole("button", { name: "Convert to JPG" }).click();
+  await expect(dialog.getByRole("link", { name: "Download IMG_0001.jpg" })).toBeVisible({ timeout: 60_000 });
+  const jpeg = await download(page);
+  expect([...jpeg.subarray(0, 3)]).toEqual([255, 216, 255]);
+  const size = await page.evaluate(async (bytes) => {
+    const bitmap = await createImageBitmap(new Blob([new Uint8Array(bytes)], { type: "image/jpeg" }));
+    return [bitmap.width, bitmap.height];
+  }, [...jpeg]);
+  expect(size[0]).toBeGreaterThan(100);
+  expect(size[1]).toBeGreaterThan(100);
+});
+
+test("HEIC converter explains a file that is not a HEIC photo", async ({ page }) => {
+  await page.goto("/heic-to-jpg");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("button", { name: "Convert to JPG" })).toBeDisabled();
+  await dialog.getByLabel("Choose files", { exact: true }).setInputFiles({ name: "photo.heic", mimeType: "image/heic", buffer: Buffer.from("this is not a photo at all, just text") });
+  await dialog.getByRole("button", { name: "Convert to JPG" }).click();
+  await expect(dialog.getByRole("alert")).toContainText("Cannot read this file as a HEIC");
+});

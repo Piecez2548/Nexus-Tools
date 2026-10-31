@@ -4,11 +4,12 @@ import { authenticate, initializeAccount, refreshAccount, useAccount, verifyAcco
 import { syncBook } from "../services/cloudBook";
 import { useLanguageStore } from "@/shared/languageStore";
 
-export default function AccountPanel({ expanded = false }: { expanded?: boolean }) {
+export default function AccountPanel({ expanded = false, initiallyOpen = false }: { expanded?: boolean; initiallyOpen?: boolean }) {
   const th = useLanguageStore(s => s.language) === "th";
   const [email, setEmail] = useState(""), [password, setPassword] = useState(""), [code, setCode] = useState("");
   const [signup, setSignup] = useState(false), [verify, setVerify] = useState(false);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [failed, setFailed] = useState(false);
+  const [open, setOpen] = useState(initiallyOpen);
   const { email: user, factor, unavailable } = useAccount();
   useEffect(() => { void initializeAccount(); }, []);
   const run = async (work: () => Promise<void>) => {
@@ -48,5 +49,5 @@ export default function AccountPanel({ expanded = false }: { expanded?: boolean 
     <a className="account-link" href="https://nexus-lemon-eight-32.vercel.app/projects" target="_blank" rel="noopener noreferrer">{th ? "เปิด Nexus All / กู้คืนรหัสผ่าน" : "Open Nexus All / Recover password"}</a>
     <p role={failed ? "alert" : "status"}>{busy ? (th ? "กำลังดำเนินการ…" : "Working…") : message}</p>
   </>;
-  return expanded ? <section className="account-panel">{content}</section> : <details className="account-panel"><summary>{th ? "บัญชี Nexus / ซิงก์ข้อมูล" : "Nexus account / Cloud sync"}</summary>{content}</details>;
+  return expanded ? <section className="account-panel">{content}</section> : <details className="account-panel" open={open} onToggle={e => setOpen(e.currentTarget.open)}><summary>{th ? "บัญชี Nexus / ซิงก์ข้อมูล" : "Nexus account / Cloud sync"}</summary>{content}</details>;
 }

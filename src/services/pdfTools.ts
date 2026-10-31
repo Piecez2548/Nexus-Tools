@@ -295,3 +295,50 @@ export async function pdfToImages(
     await doc.destroy();
   }
 }
+export const compressPresets = {
+  smaller: { scale: 1, quality: 0.55 },
+  balanced: { scale: 1.5, quality: 0.72 },
+  sharper: { scale: 2, quality: 0.85 },
+} as const;
+export type CompressPreset = keyof typeof compressPresets;
+/** Rebuilds a PDF from page images at the original page sizes. Text can no longer be selected. */
+export async function compressPdf(
+  file: File,
+  preset: CompressPreset,
+  signal: AbortSignal,
+): Promise<ToolResult> {
+  const settings = compressPresets[preset];
+  if (!settings) throw new ToolError("number");
+  const doc = await pdfPreview(file);
+  try {
+    const output = await PDFDocument.create();
+    for (let number = 1; number <= doc.numPages; number++) {
+      abortCheck(signal);
+      const page = await doc.getPage(number);
+      const size = page.getViewport({ scale: 1 });
+      const canvas = await renderPdfPage(doc, number, settings.scale);
+      // JPEG has no transparency, so paint the page on white first.
+      const flat = document.createElement("canvas");
+      flat.width = canvas.width;
+      flat.height = canvas.height;
+      const context = flat.getContext("2d")!;
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, flat.width, flat.height);
+      context.drawImage(canvas, 0, 0);
+      const jpeg = await canvasBlob(flat, "image/jpeg", settings.quality);
+      const image = await output.embedJpg(new Uint8Array(await jpeg.arrayBuffer()));
+      output.addPage([size.width, size.height]).drawImage(image, { x: 0, y: 0, width: size.width, height: size.height });
+      canvas.width = canvas.height = flat.width = flat.height = 0;
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+    const bytes = await output.save();
+    return {
+      blob: new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
+      filename: `${file.name.replace(/\.pdf$/i, "").replace(/[^\p{L}\p{N}._-]/gu, "_") || "pdf"}-compressed.pdf`,
+      pages: output.getPageCount(),
+      originalSize: file.size,
+    };
+  } finally {
+    await doc.destroy();
+  }
+}

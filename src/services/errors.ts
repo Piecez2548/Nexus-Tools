@@ -43,6 +43,10 @@ export const messages: Record<string, { en: string; th: string }> = {
     en: "Enter text or a link up to 1,000 UTF-8 bytes.",
     th: "กรอกข้อความหรือลิงก์ไม่เกิน 1,000 ไบต์ UTF-8",
   },
+  heic: {
+    en: "Cannot read this file as a HEIC/HEIF photo. Choose an unedited .heic file from an iPhone or camera.",
+    th: "อ่านไฟล์นี้เป็นภาพ HEIC/HEIF ไม่ได้ กรุณาเลือกไฟล์ .heic จาก iPhone หรือกล้องที่สมบูรณ์",
+  },
   qrread: {
     en: "No QR code found. Use a sharp, well-lit image where the whole code is visible.",
     th: "ไม่พบ QR Code ในรูป ใช้รูปที่คมชัด แสงพอ และเห็น QR ครบทั้งอัน",
@@ -70,6 +74,10 @@ export const messages: Record<string, { en: string; th: string }> = {
   vat: {
     en: "Enter an amount above 0 (up to 10,000,000,000 baht) with at most two decimals.",
     th: "กรอกจำนวนเงินมากกว่า 0 ไม่เกิน 10,000,000,000 บาท และทศนิยมไม่เกิน 2 ตำแหน่ง",
+  },
+  income: {
+    en: "Enter net income above 0 (up to 10,000,000,000 baht) with at most two decimals.",
+    th: "กรอกเงินได้สุทธิมากกว่า 0 ไม่เกิน 10,000,000,000 บาท และทศนิยมไม่เกิน 2 ตำแหน่ง",
   },
   nationalid: {
     en: "Enter all 13 digits. Spaces and dashes are fine.",
