@@ -24,6 +24,24 @@ test("each tool page has its own metadata before JavaScript runs", async ({ requ
   expect((await request.get("/404.html")).ok()).toBe(true);
 });
 
+test("pages carry share previews, structured data and an install manifest", async ({ request }) => {
+  const html = await (await request.get("/word-counter")).text();
+  expect(html).toContain('property="og:image" content="https://nexus-tools-chi.vercel.app/og-image.png"');
+  expect(html).toContain('name="twitter:card" content="summary_large_image"');
+  expect(html).toContain('rel="manifest" href="/manifest.webmanifest"');
+  const data = JSON.parse(/<script type="application\/ld\+json">([^<]*)<\/script>/.exec(html)![1]);
+  expect(data).toMatchObject({ "@type": "WebApplication", url: "https://nexus-tools-chi.vercel.app/word-counter", offers: { price: "0" } });
+  const home = await (await request.get("/")).text();
+  expect(home).toContain('"@type":"WebSite"');
+  const manifest = await (await request.get("/manifest.webmanifest")).json();
+  expect(manifest.icons.map((icon: { src: string }) => icon.src)).toEqual(["/icon-192.png", "/icon-512.png", "/icon-512.png"]);
+  for (const path of ["/og-image.png", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"]) {
+    const response = await request.get(path);
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toBe("image/png");
+  }
+});
+
 test("the OCR tool address does not collide with its asset folder", async ({ page }) => {
   await page.goto("/ocr-thai-english");
   await expect(page.getByRole("dialog")).toBeVisible();
