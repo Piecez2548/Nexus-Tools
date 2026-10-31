@@ -8,7 +8,7 @@ test("preview, contacts, quotation-to-invoice-to-receipt and readable PromptPay 
   test.setTimeout(120_000);
   await page.addInitScript(()=>localStorage.setItem("nexus-language",JSON.stringify({state:{language:"en"},version:0})));
   await page.goto("/");
-  await page.getByRole("button",{name:"Open Invoice Generator",exact:true}).click();
+  await page.getByRole("link",{name:"Open Invoice Generator",exact:true}).click();
   await page.getByRole("combobox",{name:"Document type",exact:true}).selectOption("quotation");
   await page.getByLabel("Seller / business").fill("บริษัท เน็กซัส จำกัด");
   await page.getByLabel("Customer",{exact:true}).fill("คุณสมชาย");

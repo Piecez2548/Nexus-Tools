@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef, type SyntheticEvent } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { useModalA11y } from "@/shared/useModalA11y";
 import { useLanguageStore } from "@/shared/languageStore";
@@ -11,6 +11,9 @@ const PdfStudio = lazy(() => import("./PdfStudio"));
 const ImageStudio = lazy(() => import("./ImageStudio"));
 const OcrTool = lazy(() => import("./OcrTool"));
 const ExtendedTextTools = lazy(() => import("./ExtendedTextTools"));
+// Option controls are settings rather than work.
+const holdsWork = (field: Element) =>
+  field.matches("textarea, input:not([type=checkbox], [type=radio], [type=range], [type=color])");
 export default function ToolWorkspace({
   tool,
   onClose,
@@ -31,6 +34,10 @@ export default function ToolWorkspace({
     };
   }, []);
   const group = categories.find((item) => item.id === tool.category)!;
+  const hasDisposableInput = tool.id === "unit-converter";
+  const trackEdit = (event: SyntheticEvent) => {
+    if (!hasDisposableInput && holdsWork(event.target as Element)) onEdit();
+  };
   return (
     <div
       className="workspace-backdrop"
@@ -40,8 +47,8 @@ export default function ToolWorkspace({
     >
       <section
         ref={panel}
-        onInputCapture={onEdit}
-        onChangeCapture={onEdit}
+        onInputCapture={trackEdit}
+        onChangeCapture={trackEdit}
         onDropCapture={onEdit}
         role="dialog"
         aria-modal="true"

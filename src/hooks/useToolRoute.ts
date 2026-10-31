@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { workSavedEvent } from "@/shared/download";
 import { toolFromPath, toolPath, type Tool } from "../catalog";
 
 const homeTitle = "Nexus Tools — Your everyday toolkit";
@@ -38,11 +39,14 @@ export function useToolRoute(toolTitle: (tool: Tool) => string, leaveMessage: st
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
       if (dirty.current) event.preventDefault();
     };
+    const onWorkSaved = () => { dirty.current = false; };
     window.addEventListener("popstate", onPopState);
     window.addEventListener("beforeunload", onBeforeUnload);
+    window.addEventListener(workSavedEvent, onWorkSaved);
     return () => {
       window.removeEventListener("popstate", onPopState);
       window.removeEventListener("beforeunload", onBeforeUnload);
+      window.removeEventListener(workSavedEvent, onWorkSaved);
     };
   }, [leaveMessage]);
 
