@@ -362,8 +362,8 @@ test("mobile file drop, recent history and invalid crop recovery", async ({
     page.getByRole("region", { name: "Recently used" }),
   ).toContainText("Image Crop & Watermark");
   await page.getByRole("button", { name: "Clear recent" }).click();
-  await expect(page.getByRole("region", { name: "Recently used" })).toHaveCount(
-    0,
+  await expect(page.getByRole("region", { name: "Recently used" })).toContainText(
+    "Tools you open will appear here.",
   );
 });
 test("OCR can be cancelled during initialization and then restarted", async ({

@@ -31,7 +31,7 @@ test("catalogue, favorites, search, language and theme persist", async ({
   await page
     .getByRole("textbox", { name: "Search tools" })
     .fill("no-such-tool");
-  await expect(page.getByText("Nothing here just yet")).toBeVisible();
+  await expect(page.getByText("No tools match your search")).toBeVisible();
   await page.getByRole("button", { name: "Clear search" }).click();
   await page.getByRole("button", { name: "Use light theme" }).click();
   await page.reload();
@@ -234,7 +234,7 @@ test("mobile menu, tool interaction and layout fit the viewport", async ({
     page.getByRole("dialog", { name: "Main navigation" }),
   ).toBeVisible();
   await page.getByRole("button", { name: /^Favorites/ }).click();
-  await expect(page.getByText("Nothing here just yet")).toBeVisible();
+  await expect(page.getByText("No favorites yet")).toBeVisible();
   await page.getByRole("button", { name: "Show all tools" }).click();
   await page
     .getByRole("link", { name: "Open Unit Converter", exact: true })

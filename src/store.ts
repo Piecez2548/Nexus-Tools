@@ -7,6 +7,8 @@ interface ToolsPreferences {
   recent: string[];
   recordRecent: (id: string) => void;
   clearRecent: () => void;
+  privacyNoteHidden: boolean;
+  setPrivacyNoteHidden: (hidden: boolean) => void;
   theme: "dark" | "light" | "system" | "mono";
   toggleFavorite: (id: string) => void;
   toggleTheme: () => void;
@@ -18,9 +20,11 @@ export const useToolsPreferences = create<ToolsPreferences>()(
       recent: [],
       recordRecent: (id) =>
         set((state) => ({
-          recent: [id, ...state.recent.filter((v) => v !== id)].slice(0, 8),
+          recent: [id, ...state.recent.filter((v) => v !== id)].slice(0, 6),
         })),
       clearRecent: () => set({ recent: [] }),
+      privacyNoteHidden: false,
+      setPrivacyNoteHidden: (hidden) => set({ privacyNoteHidden: hidden }),
       theme: "dark",
       toggleFavorite: (id) =>
         set((state) => ({
@@ -40,8 +44,9 @@ export const useToolsPreferences = create<ToolsPreferences>()(
           recent: Array.isArray(saved?.recent)
             ? saved.recent
                 .filter((id) => toolCatalog.some((t) => t.id === id))
-                .slice(0, 8)
+                .slice(0, 6)
             : [],
+          privacyNoteHidden: saved?.privacyNoteHidden === true,
           theme: saved?.theme === "light" || saved?.theme === "mono" || saved?.theme === "system" ? saved.theme : "dark",
           favorites: Array.isArray(saved?.favorites)
             ? saved.favorites.filter((id) =>
