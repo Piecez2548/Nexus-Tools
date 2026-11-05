@@ -4,6 +4,7 @@ import ToolsApp from "./ToolsApp";
 import { ThemeEffect } from "./shared/ThemeEffect";
 import { installStaleChunkReload } from "./shared/staleChunkReload";
 import "./tools.css";
+import "./home.css";
 
 // The shared-media page is rarely opened, so its code and the account client load on demand.
 const MediaViewer = lazy(() => import("./components/MediaViewer"));

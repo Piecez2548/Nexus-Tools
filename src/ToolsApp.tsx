@@ -1,5 +1,5 @@
 import ToolLoadBoundary from "./components/ToolLoadBoundary";
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import {
   ArrowDown,
   ArrowRight,
@@ -27,6 +27,7 @@ import {
   type CategoryId,
   type Tool,
 } from "./catalog";
+import { useCountUp } from "./hooks/useCountUp";
 import { useToolRoute } from "./hooks/useToolRoute";
 import { useToolsPreferences } from "./store";
 
@@ -45,6 +46,8 @@ export default function ToolsApp() {
     recent,
     recordRecent,
     clearRecent,
+    privacyNoteHidden,
+    setPrivacyNoteHidden,
   } = useToolsPreferences();
   const text = (en: string, th: string) => (language === "th" ? th : en);
   const [query, setQuery] = useState("");
@@ -103,11 +106,37 @@ export default function ToolsApp() {
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
   }, [language, activeTool, mobileOpen]);
+  const scrollToList = () =>
+    requestAnimationFrame(() =>
+      document.getElementById("tool-list")?.scrollIntoView({ block: "start" }),
+    );
   const navigate = (next: typeof view, nextCategory: CategoryId = "all") => {
     setView(next);
     setCategory(nextCategory);
     setQuery("");
     setMobileOpen(false);
+  };
+  // Choosing a category keeps the current page (the hero stays on Home) and brings the list into view.
+  const selectCategory = (next: CategoryId) => {
+    setCategory(next);
+    setQuery("");
+    setMobileOpen(false);
+    if (view === "favorites") setView("all");
+    scrollToList();
+  };
+  const toolCount = toolCatalog.length;
+  const categoryCount = categories.length - 1;
+  const countOf = (id: CategoryId) =>
+    id === "all" ? toolCount : toolCatalog.filter((tool) => tool.category === id).length;
+  const animatedTools = useCountUp(toolCount);
+  const animatedCategories = useCountUp(categoryCount);
+  // Feeds the card spotlight with the pointer position, relative to the hovered card.
+  const trackSpotlight = (event: MouseEvent<HTMLElement>) => {
+    const card = (event.target as HTMLElement).closest<HTMLElement>(".tool-card");
+    if (!card) return;
+    const box = card.getBoundingClientRect();
+    card.style.setProperty("--mx", `${event.clientX - box.left}px`);
+    card.style.setProperty("--my", `${event.clientY - box.top}px`);
   };
   return (
     <div className="tools-app">
@@ -187,18 +216,34 @@ export default function ToolsApp() {
             .map((item) => (
               <button
                 key={item.id}
-                className={`nav-item ${category === item.id ? "selected" : ""}`}
-                onClick={() => navigate("all", item.id)}
+                className={`nav-item tone-${item.color} ${category === item.id ? "selected" : ""}`}
+                onClick={() => selectCategory(item.id)}
                 aria-pressed={category === item.id}
               >
                 <item.icon size={18} />
                 <span>{item.name[language]}</span>
-                <ChevronRight size={14} />
+                <small>{countOf(item.id)}</small>
               </button>
             ))}
         </nav>
         <div className="sidebar-bottom">
+          {privacyNoteHidden ? (
+            <button
+              className="nav-item"
+              onClick={() => setPrivacyNoteHidden(false)}
+            >
+              <ShieldCheck size={18} />
+              {text("Show privacy note", "แสดงโน้ตความเป็นส่วนตัว")}
+            </button>
+          ) : (
           <div className="privacy-note">
+            <button
+              className="privacy-close icon-button"
+              aria-label={text("Dismiss this note", "ปิดการ์ดนี้")}
+              onClick={() => setPrivacyNoteHidden(true)}
+            >
+              <X size={15} />
+            </button>
             <ShieldCheck size={21} />
             <strong>
               {text("Your files stay yours.", "ไฟล์ของคุณอยู่กับคุณ")}
@@ -210,6 +255,7 @@ export default function ToolsApp() {
               )}
             </p>
           </div>
+          )}
           <a
             className="nav-item"
             href="#help"
@@ -298,10 +344,10 @@ export default function ToolsApp() {
           </details>
           {view === "home" && !query && (
             <section className="hero">
-              <div className="eyebrow">
+              <div className="eyebrow reveal" style={{ "--i": 0 } as CSSProperties}>
                 <span /> THE NEXUS TOOLKIT
               </div>
-              <h1>
+              <h1 className="reveal" style={{ "--i": 1 } as CSSProperties}>
                 {text("Practical tools.", "เครื่องมือที่ใช่")}
                 <br />
                 <span>
@@ -311,13 +357,32 @@ export default function ToolsApp() {
                   )}
                 </span>
               </h1>
-              <p>
+              <p className="reveal" style={{ "--i": 2 } as CSSProperties}>
                 {text(
                   "A considered collection of tools for documents, images and everyday work.",
                   "รวมเครื่องมือสำหรับเอกสาร รูปภาพ และงานประจำวัน ไว้ในที่เดียว",
                 )}
               </p>
-              <a href="#tool-list" className="hero-link">
+              <ul className="hero-stats reveal" style={{ "--i": 3 } as CSSProperties}>
+                <li>
+                  <b aria-label={String(toolCount)}>{animatedTools}</b>{" "}
+                  {text("tools", "เครื่องมือ")}
+                </li>
+                <li>
+                  <b aria-label={String(categoryCount)}>{animatedCategories}</b>{" "}
+                  {text("categories", "หมวดหมู่")}
+                </li>
+                <li>{text("Runs in your browser", "ทำงานในเบราว์เซอร์ของคุณ")}</li>
+              </ul>
+              <a
+                href="#tool-list"
+                className="hero-link reveal"
+                style={{ "--i": 4 } as CSSProperties}
+                onClick={(event) => {
+                  event.preventDefault();
+                  scrollToList();
+                }}
+              >
                 {text("Find what you need", "เลือกเครื่องมือที่คุณต้องการ")}
                 <ArrowDown size={14} />
               </a>
@@ -327,35 +392,41 @@ export default function ToolsApp() {
             className="category-strip"
             aria-label={text("Tool categories", "หมวดหมู่เครื่องมือ")}
           >
-            {categories.map((item) => (
+            {categories.map((item, index) => (
               <button
                 key={item.id}
                 className={`category-tile tone-${item.color} ${category === item.id ? "chosen" : ""}`}
+                style={{ "--i": index } as CSSProperties}
                 aria-pressed={category === item.id}
-                onClick={() => {
-                  setCategory(item.id);
-                  if (view === "home") setView("all");
-                }}
+                onClick={() => selectCategory(item.id)}
               >
                 <span className="category-icon">
                   <item.icon size={29} strokeWidth={1.7} />
                 </span>
-                <span>{item.name[language]}</span>
+                <span className="category-name">{item.name[language]}</span>
+                <small>
+                  {countOf(item.id)} {text("tools", "เครื่องมือ")}
+                </small>
               </button>
             ))}
           </div>
-          {recent.length > 0 && (
-            <section
-              className="recent-tools"
-              aria-label={text("Recently used", "ใช้ล่าสุด")}
-            >
-              <strong>{text("Recently used", "ใช้ล่าสุด")}</strong>
+          <section
+            className="recent-tools"
+            aria-label={text("Recently used", "ใช้ล่าสุด")}
+          >
+            <strong>{text("Recently used", "ใช้ล่าสุด")}</strong>
+            {recent.length === 0 && (
+              <span className="recent-empty">
+                {text("Tools you open will appear here.", "เครื่องมือที่คุณเปิดจะแสดงที่นี่")}
+              </span>
+            )}
+            {recent.length > 0 && (<>
               {recent.map((id) => {
                 const tool = toolCatalog.find((t) => t.id === id);
                 return tool ? (
                   <a
                     key={id}
-                    className="button secondary"
+                    className="recent-chip"
                     href={toolPath(tool.id)}
                     onClick={(event) => followToolLink(event, tool)}
                   >
@@ -363,11 +434,11 @@ export default function ToolsApp() {
                   </a>
                 ) : null;
               })}
-              <button className="button secondary" onClick={clearRecent}>
+              <button className="recent-clear" onClick={clearRecent}>
                 {text("Clear recent", "ล้างรายการล่าสุด")}
               </button>
-            </section>
-          )}
+            </>)}
+          </section>
           <section id="tool-list" className="tool-section">
             <div className="section-heading">
               <div>
@@ -392,13 +463,13 @@ export default function ToolsApp() {
                   <option value="recommended">
                     {text("Recommended", "แนะนำ")}
                   </option>
-                  <option value="az">{text("Name A–Z", "ตามชื่อ")}</option>
+                  <option value="az">{text("Name A–Z", "ชื่อ ก–ฮ")}</option>
                 </select>
                 <ChevronDown size={14} />
               </label>
             </div>
-            <div className="tool-grid">
-              {tools.map((tool) => {
+            <div className="tool-grid" onMouseMove={trackSpotlight}>
+              {tools.map((tool, index) => {
                 const group = categories.find(
                   (item) => item.id === tool.category,
                 )!;
@@ -406,6 +477,7 @@ export default function ToolsApp() {
                   <article
                     key={tool.id}
                     className={`tool-card tone-${group.color}`}
+                    style={{ "--i": index % 6 } as CSSProperties}
                   >
                     <a
                       className="tool-card-main"
@@ -423,7 +495,10 @@ export default function ToolsApp() {
                           <i />
                           {group.name[language]}
                         </span>
-                        <ArrowRight size={16} />
+                        <em>
+                          {text("Open", "เปิดใช้งาน")}
+                          <ArrowRight size={15} />
+                        </em>
                       </div>
                     </a>
                     <button
@@ -447,16 +522,18 @@ export default function ToolsApp() {
               <div className="empty-state">
                 <Search size={30} />
                 <h3>
-                  {text(
-                    "Nothing here just yet",
-                    "ยังไม่มีเครื่องมือในรายการนี้",
-                  )}
+                  {view === "favorites" && !query
+                    ? text("No favorites yet", "ยังไม่มีรายการโปรด")
+                    : text(
+                        "No tools match your search",
+                        "ไม่พบเครื่องมือที่ตรงกับการค้นหา",
+                      )}
                 </h3>
                 <p>
-                  {view === "favorites"
+                  {view === "favorites" && !query
                     ? text(
-                        "Save a tool using the heart icon, or clear your filters.",
-                        "กดรูปหัวใจบนเครื่องมือเพื่อบันทึก หรือล้างตัวกรอง",
+                        "Tap the heart on a card to save it here.",
+                        "กดไอคอนหัวใจที่การ์ดเพื่อบันทึกไว้ที่นี่",
                       )
                     : text(
                         "Try another search or category.",
@@ -512,10 +589,10 @@ export default function ToolsApp() {
                   ),
                 ],
               ].map(([question, answer]) => (
-                <details key={question}>
+                <details key={question} name="faq">
                   <summary>
                     {question}
-                    <span>+</span>
+                    <span aria-hidden="true" />
                   </summary>
                   <p>{answer}</p>
                 </details>
