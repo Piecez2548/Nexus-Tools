@@ -8,6 +8,8 @@ for (const theme of ["dark", "light", "mono"]) {
   test(`catalogue accessibility ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 });
     await page.addInitScript(theme => localStorage.setItem("nexus-tools-preferences", JSON.stringify({ state: { theme }, version: 0 })), theme);
+    // Entrance animations fade content in; scan the settled page, not a frame of the fade.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(page.locator(".tool-card")).toHaveCount(32);
     await page.addScriptTag({ content: axe });
