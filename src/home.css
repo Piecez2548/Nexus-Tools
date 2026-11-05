@@ -892,3 +892,161 @@ html .tools-app {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Saved cards, FAQ motion, language button ---------- */
+html .tools-app {
+  .tool-card.is-saved {
+    border-color: color-mix(in srgb, var(--heart) 45%, var(--line));
+    background: linear-gradient(160deg, color-mix(in srgb, var(--heart) 8%, var(--panel)), var(--panel) 55%);
+  }
+  .tool-card.is-saved:hover,
+  .tool-card.is-saved:focus-within {
+    border-color: var(--heart);
+  }
+  .faq-questions details[open] p {
+    animation: home-rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .language-button span {
+    min-width: 2.6em;
+  }
+}
+
+/* ---------- Tool dialog, matched to the shell ---------- */
+html .tools-app {
+  .workspace-backdrop {
+    background: rgba(5, 6, 10, 0.62);
+    backdrop-filter: blur(6px);
+  }
+  .workspace {
+    max-width: 820px;
+    padding: 32px;
+    border-radius: 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    animation: home-pop 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .workspace-header {
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .workspace-header > .tool-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+  .workspace-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .workspace-header .section-kicker {
+    font-size: 11.5px;
+    margin-bottom: 4px;
+  }
+  .workspace-header .icon-button {
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--panel2);
+    color: var(--ink);
+  }
+  .workspace-header .icon-button:hover {
+    border-color: var(--accent);
+  }
+  .workspace-description {
+    font-size: 15px;
+    margin: 20px 0 24px;
+  }
+  .tool-fields {
+    gap: 22px;
+  }
+  .field {
+    font-size: 14px;
+    font-weight: 500;
+    gap: 8px;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border-color: var(--line);
+    background: var(--bg);
+    font-weight: 400;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    outline: 0;
+  }
+  .field small,
+  .field-hint {
+    font-size: 13.5px;
+  }
+  .file-drop {
+    border-radius: 16px;
+    border: 1.5px dashed color-mix(in srgb, var(--accent) 45%, var(--line));
+    background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+    transition:
+      border-color 0.2s,
+      background-color 0.2s;
+  }
+  .file-drop:hover,
+  .file-drop:focus-within {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .file-drop svg {
+    color: var(--accent-text);
+  }
+  .file-drop input::file-selector-button {
+    border-radius: 999px;
+    padding: 9px 16px;
+    background: var(--panel2);
+    border: 1px solid var(--line);
+  }
+  .workspace .button {
+    border-radius: 999px;
+    padding: 12px 24px;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+  .workspace .button:hover:not(:disabled):not(.secondary) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px var(--hero-glow);
+  }
+  .workspace .button.secondary {
+    background: var(--panel2);
+  }
+  .result-panel {
+    border-radius: 16px;
+    border-color: var(--line);
+    background: var(--panel2);
+  }
+  .workspace-privacy {
+    border-top-color: var(--line);
+    font-size: 13.5px;
+  }
+  .workspace-privacy svg {
+    color: var(--accent-text);
+  }
+}
+@media (max-width: 899px) {
+  html .tools-app .workspace {
+    padding: 22px 18px;
+    border-radius: 18px;
+  }
+  html .tools-app .workspace-header h2 {
+    font-size: 20px;
+  }
+}
+@keyframes home-pop {
+  from { translate: 0 12px; scale: 0.98; }
+  to { translate: 0 0; scale: 1; }
+}

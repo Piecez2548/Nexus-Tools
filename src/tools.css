@@ -362,9 +362,6 @@ html {
   background: var(--surface);
   margin: 28px 0 34px;
 }
-.hero + .category-strip {
-  margin-top: 0;
-}
 .category-tile {
   display: flex;
   flex-direction: column;
@@ -385,34 +382,6 @@ html {
 .category-tile.chosen .category-icon {
   outline: 2px solid var(--color);
   outline-offset: 5px;
-}
-.tone-lime {
-  --color: #bfdf74;
-  --icon-ink: #263713;
-}
-.tone-coral {
-  --color: #ef745f;
-  --icon-ink: #34120c;
-}
-.tone-blue {
-  --color: #65afe9;
-  --icon-ink: #0c2438;
-}
-.tone-amber {
-  --color: #eeb650;
-  --icon-ink: #352409;
-}
-.tone-green {
-  --color: #65c999;
-  --icon-ink: #123522;
-}
-.tone-purple {
-  --color: #b394df;
-  --icon-ink: #291b3c;
-}
-.tone-rose {
-  --color: #ea8eaa;
-  --icon-ink: #391923;
 }
 .category-icon {
   width: 65px;

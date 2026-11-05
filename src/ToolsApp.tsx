@@ -319,7 +319,7 @@ export default function ToolsApp() {
               onClick={() => setLanguage(language === "en" ? "th" : "en")}
             >
               <Languages size={17} />
-              <span>{language.toUpperCase()}</span>
+              <span>{language === "th" ? "ไทย" : "English"}</span>
             </button>
             <span className="action-divider" />
             <button
@@ -372,7 +372,7 @@ export default function ToolsApp() {
                   <b aria-label={String(categoryCount)}>{animatedCategories}</b>{" "}
                   {text("categories", "หมวดหมู่")}
                 </li>
-                <li>{text("Runs in your browser", "ทำงานในเบราว์เซอร์ของคุณ")}</li>
+                <li>{text("Most tools run in your browser", "เครื่องมือทั่วไปทำงานในเบราว์เซอร์")}</li>
               </ul>
               <a
                 href="#tool-list"
@@ -476,7 +476,7 @@ export default function ToolsApp() {
                 return (
                   <article
                     key={tool.id}
-                    className={`tool-card tone-${group.color}`}
+                    className={`tool-card tone-${group.color} ${favorites.includes(tool.id) ? "is-saved" : ""}`}
                     style={{ "--i": index % 6 } as CSSProperties}
                   >
                     <a
