@@ -45,9 +45,8 @@ html .tools-app {
   font-family: "Noto Sans Thai", Manrope, sans-serif;
   background: var(--sidebar);
   color: var(--ink);
-  transition:
-    background-color 0.35s,
-    color 0.35s;
+  /* No colour transition: on first paint it would fade text in from the default black. */
+  transition: background-color 0.35s;
 }
 html:not([data-tools-theme="dark"]) .tools-app {
   --panel: #ffffff;
